@@ -45,7 +45,14 @@ function App() {
     <main id="top">
       <section className="hero">
         <div className="hero-copy"><span className="eyebrow"><Leaf size={15}/> YOUR COZY COFFEE CORNER</span><h1>Good coffee.<br/><em>Good moments.</em></h1><p>Slow down, sip something lovely, and find your new favorite at BEA’S KIOSK.</p><a className="primary-button" href="#menu">Explore the menu <ArrowRight size={17}/></a><div className="hero-note"><Coffee size={18}/><span>Made fresh, just for you.</span></div></div>
-        <div className="hero-art"><div className="sun-disc"></div><div className="hero-caption"><span>YOUR DAILY</span><strong>little pick-me-up</strong></div><div className="coffee-cup"><div className="cup-lid"></div><div className="cup-body"><span>BEA’S<br/>KIOSK</span></div><div className="cup-sleeve"></div><div className="cup-shadow"></div></div><span className="spark spark-one">✳</span><span className="spark spark-two">✦</span></div>
+        <div className="hero-art"><div className="sun-disc">
+  <img
+    className="sun-disc-logo"
+    src={watermarkLogo}
+    alt=""
+    aria-hidden="true"
+  />
+</div><div className="hero-caption"><span>YOUR DAILY</span><strong>little pick-me-up</strong></div><div className="coffee-cup"><div className="cup-lid"></div><div className="cup-body"><span>BEA’S<br/>KIOSK</span></div><div className="cup-sleeve"></div><div className="cup-shadow"></div></div><span className="spark spark-one">✳</span><span className="spark spark-two">✦</span></div>
       </section>
       <section className="category-strip" aria-label="Menu categories">{categories.slice(1).map((c,i)=><button key={c} onClick={()=>{setCategory(c);document.getElementById('menu').scrollIntoView({behavior:'smooth'});}} className="category-tile"><span className="category-icon">{i===3?<CakeSlice size={22}/>:<Coffee size={22}/>}</span><span>{c}</span><ArrowRight size={15}/></button>)}</section>
       <section className="menu-section" id="menu"><div className="section-heading"><div><span className="eyebrow">MADE TO BRIGHTEN YOUR DAY</span><h2>Find your <em>favorite.</em></h2><p>From comforting classics to little sweet treats.</p></div><div className="menu-count">{visibleProducts.length} menu items</div></div>
