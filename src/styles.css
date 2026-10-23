@@ -33,8 +33,8 @@
 }
 
 .sun-disc-logo {
-  width: 125%;
-  height: 125%;
+  width: 110%;
+  height: 110%;
   object-fit: contain;
   mix-blend-mode: multiply;
   opacity: 0.9;
