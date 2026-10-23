@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ShoppingBag, Search, Plus, Minus, Coffee, CakeSlice, Clock3, MapPin, X, ArrowRight, Leaf } from 'lucide-react';
 import mainLogo from './assets/beas-kiosk-main-logo.png';
-import coffeeCupImage from './assets/beas-kiosk-cup.png';
+import coffeeCupImage from './beas-kiosk-cup.png.png';
 import watermarkLogo from './assets/beas-kiosk-watermark.png';
 import './styles.css';
 
