@@ -51,7 +51,7 @@
   height: 220px;
   object-fit: contain;
   filter: drop-shadow(0 12px 8px #5c3b2520);
-  transform: translateX(-25px);
+  transform: translateX(-30px);
 }
 
 @media (max-width: 560px) {
