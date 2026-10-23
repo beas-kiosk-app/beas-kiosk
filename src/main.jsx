@@ -59,8 +59,10 @@ function App() {
   src={coffeeCupImage}
   alt="BEA'S KIOSK iced coffee"
 />
-<div className="cup-lid"></div><div className="cup-body"><span>BEA’S<br/>KIOSK</span></div><div className="cup-sleeve"></div><div className="cup-shadow"></div></div><span className="spark spark-one">✳</span><span className="spark spark-two">✦</span></div>
-      </section>
+<span className="spark spark-one">✳</span>
+<span className="spark spark-two">✦</span>
+</div>
+</section>
       <section className="category-strip" aria-label="Menu categories">{categories.slice(1).map((c,i)=><button key={c} onClick={()=>{setCategory(c);document.getElementById('menu').scrollIntoView({behavior:'smooth'});}} className="category-tile"><span className="category-icon">{i===3?<CakeSlice size={22}/>:<Coffee size={22}/>}</span><span>{c}</span><ArrowRight size={15}/></button>)}</section>
       <section className="menu-section" id="menu"><div className="section-heading"><div><span className="eyebrow">MADE TO BRIGHTEN YOUR DAY</span><h2>Find your <em>favorite.</em></h2><p>From comforting classics to little sweet treats.</p></div><div className="menu-count">{visibleProducts.length} menu items</div></div>
         <div className="filter-row">{categories.map(c=><button key={c} className={category===c?'filter active':'filter'} onClick={()=>setCategory(c)}>{c}</button>)}</div>
