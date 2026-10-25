@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { supabase } from './supabase';
 import { createRoot } from 'react-dom/client';
 import { ShoppingBag, Search, Plus, Minus, Coffee, CakeSlice, Clock3, MapPin, X, ArrowRight, Leaf } from 'lucide-react';
 import mainLogo from './assets/beas-kiosk-main-logo.png';
@@ -24,6 +25,35 @@ const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Specialty Drinks'
 const money = (value) => `$${value.toFixed(2)}`; // Currency symbol is provisional until the business currency is confirmed.
 function App() {
   const [category, setCategory] = useState('All Items');
+  const [deliveryAvailable, setDeliveryAvailable] = useState(true);
+
+
+const [deliveryUnavailableMessage, setDeliveryUnavailableMessage] = useState(
+  'Delivery is temporarily unavailable. We are sorry for the inconvenience. Pickup is available for all orders. Thank you for understanding!'
+);
+
+useEffect(() => {
+  async function loadDeliverySettings() {
+    const { data, error } = await supabase
+      .from('store_settings')
+      .select('delivery_available, delivery_unavailable_message')
+      .eq('id', 1)
+      .single();
+
+    if (error) {
+      console.error('Could not load delivery settings:', error);
+      return;
+    }
+
+    if (data) {
+      setDeliveryAvailable(data.delivery_available);
+      setDeliveryUnavailableMessage(data.delivery_unavailable_message);
+    }
+  }
+
+  loadDeliverySettings();
+}, []);
+
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
@@ -44,6 +74,28 @@ function App() {
       <div className="header-actions"><label className="search-box"><Search size={17}/><input aria-label="Search menu" value={search} onChange={e => setSearch(e.target.value)} placeholder="Find your favorite..." /></label><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Open cart, ${count} items`}><ShoppingBag size={19}/><span>Cart</span><b>{count}</b></button></div>
     </header>
     <main id="top">
+      
+      {!deliveryAvailable && (
+        <div
+          className="delivery-notice"
+          role="status"
+          style={{
+            margin: '16px auto',
+            padding: '14px 20px',
+            maxWidth: '1100px',
+            borderRadius: '12px',
+            background: '#f5e6d5',
+            color: '#50372a',
+            textAlign: 'center',
+            border: '1px solid #d7ae75'
+          }}
+        >
+          <strong>Pickup only at this time</strong>
+          <p style={{ margin: '6px 0 0' }}>
+            {deliveryUnavailableMessage}
+          </p>
+        </div>
+      )}
       <section className="hero">
         <div className="hero-copy"><span className="eyebrow"><Leaf size={15}/> YOUR COZY COFFEE CORNER</span><h1>Good coffee.<br/><em>Good moments.</em></h1><p>Slow down, sip something lovely, and find your new favorite at BEA’S KIOSK.</p><a className="primary-button" href="#menu">Explore the menu <ArrowRight size={17}/></a><div className="hero-note"><Coffee size={18}/><span>Made fresh, just for you.</span></div></div>
         <div className="hero-art"><div className="sun-disc">
@@ -75,7 +127,31 @@ function App() {
     <footer><span>© {new Date().getFullYear()} BEA’S KIOSK</span><span>Made with warmth <span className="heart">♥</span></span><span>Fresh coffee, happy moments.</span></footer>
     {notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="Dismiss"><X size={16}/></button></div>}
     {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR LITTLE ORDER</span><h2>Your cart ({count})</h2></div><button className="icon-button" onClick={()=>setCartOpen(false)} aria-label="Close cart"><X/></button></div>{cartItems.length===0?<div className="empty-cart"><ShoppingBag size={35}/><h3>Your cart is waiting.</h3><p>Add a coffee or treat to get started.</p><button className="primary-button" onClick={()=>setCartOpen(false)}>Explore menu</button></div>:<><div className="cart-list">{cartItems.map(p=><div className="cart-line" key={p.id}><div className="cart-dot"><Coffee size={18}/></div><div className="cart-product"><strong>{p.name}</strong><span>{money(p.price)}{p.unit?` / ${p.unit}`:''}</span><div className="qty-control"><button onClick={()=>changeQty(p.id,-1)} aria-label={`Remove one ${p.name}`}><Minus size={13}/></button><span>{cart[p.id]}</span><button onClick={()=>changeQty(p.id,1)} aria-label={`Add one ${p.name}`}><Plus size={13}/></button></div></div><strong>{money(p.price*cart[p.id])}</strong></div>)}</div><div className="cart-bottom"><div className="subtotal"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><p>Delivery fees, if applicable, will be confirmed before order submission.</p><button className="primary-button full" onClick={()=>{setCartOpen(false);setCheckoutOpen(true);}}>Continue to checkout <ArrowRight size={17}/></button></div></>}</aside></div>}
-    {checkoutOpen&&<div className="overlay" onClick={()=>setCheckoutOpen(false)}><section className="checkout-modal" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">ALMOST THERE</span><h2>Checkout</h2></div><button className="icon-button" onClick={()=>setCheckoutOpen(false)} aria-label="Close checkout"><X/></button></div><form onSubmit={placeDemoOrder}><label>Your name<input required value={customer.name} onChange={e=>setCustomer({...customer,name:e.target.value})} placeholder="Name for your order"/></label><label>Phone number<input required value={customer.phone} onChange={e=>setCustomer({...customer,phone:e.target.value})} placeholder="Best number to reach you"/></label><label>How would you like your order?<select value={customer.fulfilment} onChange={e=>setCustomer({...customer,fulfilment:e.target.value})}><option>Pickup</option><option>Delivery</option></select></label><label>Payment method<select value={customer.payment} onChange={e=>setCustomer({...customer,payment:e.target.value})}><option>Mobile banking / digital wallet</option><option>Cash on pickup / delivery</option></select></label>{customer.payment==='Mobile banking / digital wallet'&&<div className="payment-note"><strong>Payment instructions coming soon</strong><p>Secure banking details and receipt upload will be activated after we connect the private database and owner dashboard. Do not send payment using this preview.</p></div>}<div className="subtotal"><span>Order subtotal</span><strong>{money(subtotal)}</strong></div><button className="primary-button full" type="submit">Preview checkout <ArrowRight size={17}/></button><p className="form-footnote">Preview only — orders are not submitted or saved yet.</p></form></section></div>}
+    {checkoutOpen&&<div className="overlay" onClick={()=>setCheckoutOpen(false)}><section className="checkout-modal" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">ALMOST THERE</span><h2>Checkout</h2></div><button className="icon-button" onClick={()=>setCheckoutOpen(false)} aria-label="Close checkout"><X/></button></div><form onSubmit={placeDemoOrder}><label>Your name<input required value={customer.name} onChange={e=>setCustomer({...customer,name:e.target.value})} placeholder="Name for your order"/></label><label>Phone number<input required value={customer.phone} onChange={e=>setCustomer({...customer,phone:e.target.value})} placeholder="Best number to reach you"/><
+{!deliveryAvailable && (
+  <div
+    className="payment-note"
+    role="status"
+    style={{ borderColor: '#d7ae75' }}
+  >
+    <strong>Pickup only at this time</strong>
+    <p>{deliveryUnavailableMessage}</p>
+  </div>
+)}
+
+<label>
+  How would you like your order?
+  <select
+    value={deliveryAvailable ? customer.fulfilment : 'Pickup'}
+    onChange={e =>
+      setCustomer({ ...customer, fulfilment: e.target.value })
+    }
+  >
+    <option>Pickup</option>
+    {deliveryAvailable && <option>Delivery</option>}
+  </select>
+</label>
+<label>Payment method<select value={customer.payment} onChange={e=>setCustomer({...customer,payment:e.target.value})}><option>Mobile banking / digital wallet</option><option>Cash on pickup / delivery</option></select></label>{customer.payment==='Mobile banking / digital wallet'&&<div className="payment-note"><strong>Payment instructions coming soon</strong><p>Secure banking details and receipt upload will be activated after we connect the private database and owner dashboard. Do not send payment using this preview.</p></div>}<div className="subtotal"><span>Order subtotal</span><strong>{money(subtotal)}</strong></div><button className="primary-button full" type="submit">Preview checkout <ArrowRight size={17}/></button><p className="form-footnote">Preview only — orders are not submitted or saved yet.</p></form></section></div>}
     <div className="watermark" style={{backgroundImage:`url(${watermarkLogo})`}} aria-hidden="true"></div>
   </div>;
 }
