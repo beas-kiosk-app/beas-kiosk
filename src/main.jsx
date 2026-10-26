@@ -173,17 +173,7 @@ useEffect(() => {
     </select>
   </label>
 
-  <label>
-    Payment method
-    <select
-      value={customer.payment}
-      onChange={e =>
-        setCustomer({ ...customer, payment: e.target.value })
-      }
-    >
-      <option>Mobile banking / digital wallet</option>
-      <option>Cash on pickup / delivery</option>
-    </select>
+
   </label>
 Payment method<select value={customer.payment} onChange={e=>setCustomer({...customer,payment:e.target.value})}><option>Mobile banking / digital wallet</option><option>Cash on pickup / delivery</option></select></label>{customer.payment==='Mobile banking / digital wallet'&&<div className="payment-note"><strong>Payment instructions coming soon</strong><p>Secure banking details and receipt upload will be activated after we connect the private database and owner dashboard. Do not send payment using this preview.</p></div>}<div className="subtotal"><span>Order subtotal</span><strong>{money(subtotal)}</strong></div><button className="primary-button full" type="submit">Preview checkout <ArrowRight size={17}/></button><p className="form-footnote">Preview only — orders are not submitted or saved yet.</p></form></section></div>}
     <div className="watermark" style={{backgroundImage:`url(${watermarkLogo})`}} aria-hidden="true"></div>
