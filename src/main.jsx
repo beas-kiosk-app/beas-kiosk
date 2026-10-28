@@ -26,6 +26,10 @@ const money = (value) => `$${value.toFixed(2)}`; // Currency symbol is provision
 function App() {
   const [category, setCategory] = useState('All Items');
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
+  const [products, setProducts] = useState([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState('');
+
 
 
 const [deliveryUnavailableMessage, setDeliveryUnavailableMessage] = useState(
@@ -52,6 +56,39 @@ useEffect(() => {
   }
 
   loadDeliverySettings();
+}, []);
+  
+useEffect(() => {
+  async function loadMenu() {
+    setMenuLoading(true);
+    setMenuError('');
+
+    const { data, error } = await supabase
+      .from('menu_items')
+      .select('id, name, category, price, description, image_url, tag, unit, menu_type, is_available, sort_order')
+      .eq('is_available', true)
+      .eq('menu_type', 'regular')
+      .order('sort_order', { ascending: true });
+
+    if (error) {
+      console.error('Could not load menu:', error);
+      setMenuError('We could not load the menu. Please try again shortly.');
+      setMenuLoading(false);
+      return;
+    }
+
+    setProducts(
+      (data || []).map(item => ({
+        ...item,
+        price: Number(item.price),
+        description: item.description || '',
+      }))
+    );
+
+    setMenuLoading(false);
+  }
+
+  loadMenu();
 }, []);
 
   const [search, setSearch] = useState('');
