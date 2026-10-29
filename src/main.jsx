@@ -155,8 +155,72 @@ useEffect(() => {
       <section className="category-strip" aria-label="Menu categories">{categories.slice(1).map((c,i)=><button key={c} onClick={()=>{setCategory(c);document.getElementById('menu').scrollIntoView({behavior:'smooth'});}} className="category-tile"><span className="category-icon">{i===3?<CakeSlice size={22}/>:<Coffee size={22}/>}</span><span>{c}</span><ArrowRight size={15}/></button>)}</section>
       <section className="menu-section" id="menu"><div className="section-heading"><div><span className="eyebrow">MADE TO BRIGHTEN YOUR DAY</span><h2>Find your <em>favorite.</em></h2><p>From comforting classics to little sweet treats.</p></div><div className="menu-count">{visibleProducts.length} menu items</div></div>
         <div className="filter-row">{categories.map(c=><button key={c} className={category===c?'filter active':'filter'} onClick={()=>setCategory(c)}>{c}</button>)}</div>
-        <div className="product-grid">{visibleProducts.map((p,i)=><article className="product-card" key={p.id}><div className={`product-art art-${p.category.toLowerCase().replaceAll(' ','-')}`}><span className="product-number">{String(i+1).padStart(2,'0')}</span><div className="mini-cup"><div className="mini-lid"></div><div className="mini-body"><span>{p.category==='Desserts'?'SWEET':'BEA’S'}</span></div></div>{p.tag&&<span className="product-tag">{p.tag}</span>}</div><div className="product-info"><div className="product-title-line"><h3>{p.name}</h3><strong>{money(p.price)}{p.unit&&<small> / {p.unit}</small>}</strong></div><p>{p.description}</p><button className="add-button" onClick={()=>{changeQty(p.id,1);setNotice(`${p.name} added to your cart.`);}}><Plus size={16}/> Add to cart</button></div></article>)}</div>
-        {visibleProducts.length===0&&<div className="empty-state">No menu items match that search. Try another name.</div>}
+       
+{menuLoading ? (
+  <div className="empty-state">Preparing your menu...</div>
+) : menuError ? (
+  <div className="empty-state" role="alert">
+    <p>{menuError}</p>
+    <button
+      className="filter"
+      onClick={() => window.location.reload()}
+    >
+      Try again
+    </button>
+  </div>
+) : (
+  <>
+    <div className="product-grid">
+      {visibleProducts.map((p, i) => (
+        <article className="product-card" key={p.id}>
+          <div className={`product-art art-${p.category.toLowerCase().replaceAll(' ', '-')}`}>
+            <span className="product-number">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+
+            <div className="mini-cup">
+              <div className="mini-lid"></div>
+              <div className="mini-body">
+                <span>{p.category === 'Desserts' ? 'SWEET' : 'BEA’S'}</span>
+              </div>
+            </div>
+
+            {p.tag && <span className="product-tag">{p.tag}</span>}
+          </div>
+
+          <div className="product-info">
+            <div className="product-title-line">
+              <h3>{p.name}</h3>
+              <strong>
+                {money(p.price)}
+                {p.unit && <small> / {p.unit}</small>}
+              </strong>
+            </div>
+
+            <p>{p.description}</p>
+
+            <button
+              className="add-button"
+              onClick={() => {
+                changeQty(p.id, 1);
+                setNotice(`${p.name} added to your cart.`);
+              }}
+            >
+              <Plus size={16} /> Add to cart
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    {visibleProducts.length === 0 && (
+      <div className="empty-state">
+        No menu items match that search. Try another name.
+      </div>
+    )}
+  </>
+)}
+
       </section>
       <section className="order-info" id="order-info"><div className="info-icon"><Clock3 size={25}/></div><div><span className="eyebrow">EASY AS ONE, TWO, SIP</span><h2>Order your way.</h2><p>Choose pickup or delivery at checkout. Electronic payment instructions and receipt upload will be available after secure payment setup is complete.</p></div><a className="text-link" href="#menu">Browse the menu <ArrowRight size={16}/></a></section>
       <section className="about-section" id="about"><img src={mainLogo} alt="BEA'S KIOSK"/><div><span className="eyebrow">A WARM WELCOME, ALWAYS</span><h2>A little kiosk, <em>a lot of heart.</em></h2><p>Thanks for stopping by. We’re happy to be part of your everyday coffee moments.</p></div></section>
