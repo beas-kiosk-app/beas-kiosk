@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from './supabase';
 import {
   LayoutDashboard, ShoppingBag, Coffee, ChartNoAxesCombined, Package,
   Wallet, CreditCard, Users, Settings, Bell, Search, Menu, X,
@@ -25,7 +26,7 @@ const sampleOrders = [
   { id: 'BK-0003', customer: 'Example customer', items: '1 item', total: '—', status: 'Awaiting order connection', tone: 'pending' },
 ];
 
-export default function AdminDashboard() {
+function DashboardShell({ onSignOut, ownerEmail }) {
   const [active, setActive] = useState('Overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [range, setRange] = useState('Last 7 days');
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
           <div className="admin-top-actions">
             <label className="admin-search"><Search size={16}/><input placeholder="Search dashboard" aria-label="Search dashboard"/></label>
             <button className="admin-icon-button admin-notification" aria-label="Notifications"><Bell size={19}/><i /></button>
-            <div className="admin-avatar" aria-label="Owner account">BK</div>
+            <div className="admin-owner-controls"><span className="admin-owner-email">{ownerEmail}</span><button className="admin-signout-button" onClick={onSignOut}>Sign out</button><div className="admin-avatar" aria-label="Owner account">BK</div></div>
           </div>
         </header>
 
@@ -113,4 +114,97 @@ export default function AdminDashboard() {
       </main>
     </div>
   );
+}
+
+
+const OWNER_EMAIL = 'edlanders1514@gmail.com';
+
+export default function AdminDashboard() {
+  const [session, setSession] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [email, setEmail] = useState(OWNER_EMAIL);
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!mounted) return;
+      if (error) setErrorMessage('Could not check your sign-in session. Please refresh and try again.');
+      setSession(data?.session || null);
+      setCheckingSession(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (mounted) setSession(nextSession);
+    });
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const signedInEmail = (session.user?.email || '').toLowerCase();
+    if (signedInEmail !== OWNER_EMAIL) {
+      supabase.auth.signOut();
+      setSession(null);
+      setErrorMessage('This account is not authorized to access the BEA’S KIOSK owner dashboard.');
+    }
+  }, [session]);
+
+  const handleSignIn = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setErrorMessage('');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setBusy(false);
+    if (error) {
+      setErrorMessage('Sign-in failed. Check the owner email and password, then try again.');
+      return;
+    }
+    if ((data.user?.email || '').toLowerCase() !== OWNER_EMAIL) {
+      await supabase.auth.signOut();
+      setSession(null);
+      setErrorMessage('This account is not authorized to access the owner dashboard.');
+      return;
+    }
+    setPassword('');
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setPassword('');
+  };
+
+  if (checkingSession) {
+    return <div className="admin-auth-page"><div className="admin-auth-card"><img src={mainLogo} alt="BEA'S KIOSK" /><p>Checking your secure owner session…</p></div></div>;
+  }
+
+  if (!session || (session.user?.email || '').toLowerCase() !== OWNER_EMAIL) {
+    return (
+      <div className="admin-auth-page">
+        <form className="admin-auth-card" onSubmit={handleSignIn}>
+          <img src={mainLogo} alt="BEA'S KIOSK" />
+          <span className="admin-auth-eyebrow">PRIVATE OWNER AREA</span>
+          <h1>Welcome back.</h1>
+          <p>Sign in with your BEA’S KIOSK owner account to continue.</p>
+          <label htmlFor="owner-email">Owner email</label>
+          <input id="owner-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="owner-password">Password</label>
+          <input id="owner-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          {errorMessage && <p className="admin-auth-error" role="alert">{errorMessage}</p>}
+          <button className="admin-auth-submit" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in securely'}</button>
+          <a href="/">← Back to customer store</a>
+        </form>
+      </div>
+    );
+  }
+
+  return <DashboardShell onSignOut={handleSignOut} ownerEmail={session.user.email} />;
 }
