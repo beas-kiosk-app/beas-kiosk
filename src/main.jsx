@@ -344,5 +344,5 @@ useEffect(() => {
   </div>;
 }
 
-const isDashboardRoute = window.location.pathname.replace(/\\/+$/, '') === '/dashboard';
+const isDashboardRoute = window.location.pathname.replace(/\/+$/, '') === '/dashboard';
 createRoot(document.getElementById('root')).render(isDashboardRoute ? <AdminDashboard /> : <App />);
