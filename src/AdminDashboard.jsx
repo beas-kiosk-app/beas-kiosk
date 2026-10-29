@@ -126,6 +126,10 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [recoveryMode, setRecoveryMode] = useState(new URLSearchParams(window.location.search).get('reset-password') === 'true');
+  const [recoveryEmailSent, setRecoveryEmailSent] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -135,8 +139,13 @@ export default function AdminDashboard() {
       setSession(data?.session || null);
       setCheckingSession(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (mounted) setSession(nextSession);
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!mounted) return;
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecoveryMode(true);
+        setErrorMessage('');
+      }
+      setSession(nextSession);
     });
     return () => {
       mounted = false;
@@ -153,6 +162,51 @@ export default function AdminDashboard() {
       setErrorMessage('This account is not authorized to access the BEA’S KIOSK owner dashboard.');
     }
   }, [session]);
+
+  const handleRecoveryRequest = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setErrorMessage('');
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/dashboard?reset-password=true`,
+    });
+    setBusy(false);
+    if (error) {
+      setErrorMessage(error.message.includes('rate limit') || error.status === 429
+        ? 'Supabase is temporarily limiting recovery emails. Please wait before requesting another email.'
+        : 'We could not send the recovery email. Please try again later.');
+      return;
+    }
+    setRecoveryEmailSent(true);
+  };
+
+  const handlePasswordUpdate = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+    if (newPassword.length < 8) {
+      setErrorMessage('Choose a password with at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage('The passwords do not match.');
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setBusy(false);
+    if (error) {
+      setErrorMessage('We could not update the password. Please reopen the latest recovery email and try again.');
+      return;
+    }
+    setPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setRecoveryMode(false);
+    window.history.replaceState({}, document.title, '/dashboard');
+    setErrorMessage('Password updated successfully. You can now use your new password to sign in.');
+    await supabase.auth.signOut();
+    setSession(null);
+  };
 
   const handleSignIn = async (event) => {
     event.preventDefault();
@@ -187,6 +241,42 @@ export default function AdminDashboard() {
   }
 
   if (!session || (session.user?.email || '').toLowerCase() !== OWNER_EMAIL) {
+    if (recoveryMode) {
+      return (
+        <div className="admin-auth-page">
+          <form className="admin-auth-card" onSubmit={handlePasswordUpdate}>
+            <img src={mainLogo} alt="BEA'S KIOSK" />
+            <span className="admin-auth-eyebrow">SECURE ACCOUNT RECOVERY</span>
+            <h1>Choose a new password.</h1>
+            <p>Set a new password for your BEA’S KIOSK owner account.</p>
+            <label htmlFor="new-owner-password">New password</label>
+            <input id="new-owner-password" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} required />
+            <label htmlFor="confirm-owner-password">Confirm new password</label>
+            <input id="confirm-owner-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required />
+            {errorMessage && <p className="admin-auth-error" role="alert">{errorMessage}</p>}
+            <button className="admin-auth-submit" type="submit" disabled={busy}>{busy ? 'Updating password…' : 'Save new password'}</button>
+            <button type="button" className="admin-auth-link-button" onClick={() => { setRecoveryMode(false); setErrorMessage(''); window.history.replaceState({}, document.title, '/dashboard'); }}>Back to sign in</button>
+          </form>
+        </div>
+      );
+    }
+    if (new URLSearchParams(window.location.search).get('forgot-password') === 'true') {
+      return (
+        <div className="admin-auth-page">
+          <form className="admin-auth-card" onSubmit={handleRecoveryRequest}>
+            <img src={mainLogo} alt="BEA'S KIOSK" />
+            <span className="admin-auth-eyebrow">OWNER ACCOUNT HELP</span>
+            <h1>Reset your password.</h1>
+            {recoveryEmailSent ? <p>Check your inbox for a recovery email. If it does not arrive, wait before requesting another one.</p> : <p>We’ll send a secure password-reset link to your owner email.</p>}
+            <label htmlFor="recovery-email">Owner email</label>
+            <input id="recovery-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            {errorMessage && <p className="admin-auth-error" role="alert">{errorMessage}</p>}
+            {!recoveryEmailSent && <button className="admin-auth-submit" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send recovery email'}</button>}
+            <a href="/dashboard">← Back to sign in</a>
+          </form>
+        </div>
+      );
+    }
     return (
       <div className="admin-auth-page">
         <form className="admin-auth-card" onSubmit={handleSignIn}>
@@ -200,6 +290,7 @@ export default function AdminDashboard() {
           <input id="owner-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           {errorMessage && <p className="admin-auth-error" role="alert">{errorMessage}</p>}
           <button className="admin-auth-submit" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in securely'}</button>
+          <a href="/dashboard?forgot-password=true">Forgot your password?</a>
           <a href="/">← Back to customer store</a>
         </form>
       </div>
