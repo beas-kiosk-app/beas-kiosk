@@ -21,7 +21,7 @@ const products = [
   { id: 11, name: 'Cinnamon Roll Bites', category: 'Desserts', price: 1, unit: 'each', description: 'Little cinnamon-swirled bites, perfect alongside coffee.' },
   { id: 12, name: 'Pumpkin Sweet', category: 'Desserts', price: 2, unit: 'each', description: 'A sweet pumpkin treat to pair with your favorite drink.' },
 ];
-const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Specialty Drinks', 'Desserts'];
+const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Signature Drinks', 'Desserts'];
 const money = (value) => `$${value.toFixed(2)}`; // Currency symbol is provisional until the business currency is confirmed.
 function App() {
   const [category, setCategory] = useState('All Items');
