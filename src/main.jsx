@@ -6,6 +6,7 @@ import mainLogo from './assets/beas-kiosk-main-logo.png';
 import coffeeCupImage from './assets/beas-kiosk-cup.png.png';
 import watermarkLogo from './assets/beas-kiosk-watermark.png';
 import './styles.css';
+import AdminDashboard from './AdminDashboard';
 
 const products = [
   { id: 1, name: 'Café au Lait', category: 'Hot Coffee', price: 6, description: 'Equal parts strong brewed coffee and hot steamed milk.', tag: 'Classic' },
@@ -343,4 +344,5 @@ useEffect(() => {
   </div>;
 }
 
-createRoot(document.getElementById('root')).render(<App/>);
+const isDashboardRoute = window.location.pathname.replace(/\\/+$/, '') === '/dashboard';
+createRoot(document.getElementById('root')).render(isDashboardRoute ? <AdminDashboard /> : <App />);
