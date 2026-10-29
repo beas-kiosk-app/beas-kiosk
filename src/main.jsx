@@ -98,7 +98,7 @@ useEffect(() => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [customer, setCustomer] = useState({ name: '', phone: '', fulfilment: 'Pickup', payment: 'Mobile banking / digital wallet' });
-  const visibleProducts = useMemo(() => products.filter(p => (category === 'All Items' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())), [category, search]);
+  const visibleProducts = useMemo(() => products.filter(p => (category === 'All Items' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())), [products, category, search]);
   const cartItems = products.filter(p => cart[p.id] > 0);
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
   const subtotal = cartItems.reduce((sum, p) => sum + p.price * cart[p.id], 0);
