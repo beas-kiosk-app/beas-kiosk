@@ -241,6 +241,10 @@ export default function AdminDashboard() {
     setPassword('');
   };
 
+  // Temporary development mode: keep the owner dashboard accessible without sign-in.
+  // Re-enable the authentication screens before launching the live business dashboard.
+  return <DashboardShell onSignOut={() => {}} ownerEmail="Owner workspace (login temporarily disabled)" />;
+
   if (checkingSession) {
     return <div className="admin-auth-page"><div className="admin-auth-card"><img src={mainLogo} alt="BEA'S KIOSK" /><p>Checking your secure owner session…</p></div></div>;
   }
