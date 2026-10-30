@@ -66,16 +66,29 @@ function LiveOrders() {
     };
   }, []);
 
+  const statusToDatabase = {
+    New: 'pending',
+    Preparing: 'preparing',
+    Ready: 'ready',
+    Completed: 'completed',
+    Cancelled: 'cancelled',
+  };
+  const statusToLabel = status => {
+    const value = String(status || '').toLowerCase();
+    if (value === 'pending' || value === 'confirmed' || value === 'new') return 'New';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
   const updateStatus = async (orderId, status) => {
     setUpdatingId(orderId);
     setError('');
     const { data, error: updateError } = await supabase
       .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status: statusToDatabase[status] || status.toLowerCase(), updated_at: new Date().toISOString() })
       .eq('id', orderId)
       .select()
       .single();
-    if (updateError) setError('Status could not be updated. Check your owner access and try again.');
+    if (updateError) setError(`Status could not be updated: ${updateError.message}`);
     else setOrders(current => current.map(order => order.id === orderId ? data : order));
     setUpdatingId(null);
   };
@@ -117,7 +130,7 @@ function LiveOrders() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
                 <strong>Status:</strong>
-                <select aria-label={`Status for ${order.order_number}`} value={order.status} disabled={updatingId === order.id} onChange={event => updateStatus(order.id, event.target.value)} style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid #d8cbbb', background: 'white' }}>
+                <select aria-label={`Status for ${order.order_number}`} value={statusToLabel(order.status)} disabled={updatingId === order.id} onChange={event => updateStatus(order.id, event.target.value)} style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid #d8cbbb', background: 'white' }}>
                   {['New', 'Preparing', 'Ready', 'Completed', 'Cancelled'].map(status => <option key={status}>{status}</option>)}
                 </select>
                 {updatingId === order.id && <span>Saving…</span>}
