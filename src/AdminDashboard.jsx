@@ -27,6 +27,109 @@ const sampleOrders = [
   { id: 'BK-0003', customer: 'Example customer', items: '1 item', total: '—', status: 'Awaiting order connection', tone: 'pending' },
 ];
 
+
+function LiveOrders() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    const loadOrders = async () => {
+      const { data, error: loadError } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!active) return;
+      if (loadError) setError('Could not load orders. Please refresh and try again.');
+      else setOrders(data || []);
+      setLoading(false);
+    };
+    loadOrders();
+    const channel = supabase
+      .channel('owner-live-orders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+        if (!active) return;
+        if (payload.eventType === 'INSERT') {
+          setOrders(current => [payload.new, ...current.filter(order => order.id !== payload.new.id)]);
+        } else if (payload.eventType === 'UPDATE') {
+          setOrders(current => current.map(order => order.id === payload.new.id ? payload.new : order));
+        } else if (payload.eventType === 'DELETE') {
+          setOrders(current => current.filter(order => order.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const updateStatus = async (orderId, status) => {
+    setUpdatingId(orderId);
+    setError('');
+    const { data, error: updateError } = await supabase
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select()
+      .single();
+    if (updateError) setError('Status could not be updated. Check your owner access and try again.');
+    else setOrders(current => current.map(order => order.id === orderId ? data : order));
+    setUpdatingId(null);
+  };
+
+  const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value || 0));
+  const dateLabel = value => new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+
+  return (
+    <section className="admin-panel" style={{ padding: 24 }}>
+      <div className="admin-panel-heading">
+        <div><h2>Incoming orders</h2><p>New orders appear here automatically while this page is open.</p></div>
+        <button className="admin-secondary-button" onClick={() => window.location.reload()}>Refresh</button>
+      </div>
+      {error && <p role="alert" style={{ color: '#a33', margin: '12px 0' }}>{error}</p>}
+      {loading ? <p>Loading orders…</p> : orders.length === 0 ? (
+        <div className="admin-popular-empty"><span className="admin-coffee-tile"><ShoppingBag size={22}/></span><strong>No orders yet</strong><p>Customer orders will appear here once secure checkout submission is connected.</p></div>
+      ) : (
+        <div style={{ display: 'grid', gap: 16 }}>
+          {orders.map(order => (
+            <article key={order.id} style={{ border: '1px solid #e7dfd2', borderRadius: 14, padding: 18, background: '#fffdf8' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                <div><strong style={{ fontSize: 17 }}>{order.order_number}</strong><div style={{ color: '#76695e', fontSize: 13 }}>{dateLabel(order.created_at)}</div></div>
+                <strong>{money(order.subtotal)}</strong>
+              </div>
+              <div style={{ margin: '14px 0', display: 'grid', gap: 5 }}>
+                <div><strong>Customer:</strong> {order.customer_name}</div>
+                <div><strong>Phone:</strong> {order.customer_phone}</div>
+                <div><strong>Fulfilment:</strong> {order.fulfilment}</div>
+                <div><strong>Payment:</strong> {order.payment_method}</div>
+              </div>
+              <div style={{ borderTop: '1px solid #eee5d8', paddingTop: 10 }}>
+                <strong>Items</strong>
+                {Array.isArray(order.items) && order.items.length ? order.items.map((item, index) => (
+                  <div key={index} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0' }}>
+                    <span>{item.quantity || item.qty || 1} × {item.name || item.title || 'Menu item'}</span>
+                    <span>{money((item.price || 0) * (item.quantity || item.qty || 1))}</span>
+                  </div>
+                )) : <p style={{ color: '#76695e' }}>No item details recorded.</p>}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+                <strong>Status:</strong>
+                <select aria-label={`Status for ${order.order_number}`} value={order.status} disabled={updatingId === order.id} onChange={event => updateStatus(order.id, event.target.value)} style={{ padding: '9px 12px', borderRadius: 8, border: '1px solid #d8cbbb', background: 'white' }}>
+                  {['New', 'Preparing', 'Ready', 'Completed', 'Cancelled'].map(status => <option key={status}>{status}</option>)}
+                </select>
+                {updatingId === order.id && <span>Saving…</span>}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function DashboardShell({ onSignOut, ownerEmail }) {
   const [active, setActive] = useState('Overview');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -76,7 +179,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
             <button className="admin-date-button"><CalendarDays size={16}/> Today <ChevronDown size={15}/></button>
           </div>
 
-          {active === 'Menu management' ? <MenuManagement /> : active !== 'Overview' ? (
+          {active === 'Menu management' ? <MenuManagement /> : active === 'Live orders' ? <LiveOrders /> : active !== 'Overview' ? (
             <section className="admin-coming-panel"><div className="admin-coming-icon"><Coffee size={26}/></div><h2>{active} is coming next</h2><p>This navigation and page shell are in place. We'll connect this section to the database after the dashboard layout is approved.</p><button className="admin-primary-button" onClick={() => setActive('Overview')}>Back to overview</button></section>
           ) : <>
             <div className="admin-notice"><span className="admin-notice-mark">i</span><p><strong>Dashboard design preview</strong> — no live orders or sales are connected yet. The dashes below are intentional placeholders, not business figures.</p></div>
