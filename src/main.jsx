@@ -26,6 +26,36 @@ const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Specialty Drinks'
 const money = (value) => `$${value.toFixed(2)}`; // Currency symbol is provisional until the business currency is confirmed.
 function App() {
   const [category, setCategory] = useState('All Items');
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    setIsInstalled(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+    const handleInstallPrompt = event => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    const handleInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+    window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+    window.addEventListener('appinstalled', handleInstalled);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(error => console.error('App setup could not be completed:', error));
+    }
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+      window.removeEventListener('appinstalled', handleInstalled);
+    };
+  }, []);
+
+  const installApp = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
   const [menuType, setMenuType] = useState('regular');
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
   const [products, setProducts] = useState([]);
@@ -154,7 +184,7 @@ useEffect(() => {
     <header className="site-header">
       <a className="brand" href="#top" aria-label="BEA'S KIOSK home"><img src={mainLogo} alt="BEA'S KIOSK main logo" /></a>
       <nav className="desktop-nav"><a href="#menu">Menu</a><a href="#about">Our little kiosk</a><a href="#order-info">How to order</a><a href="#track-order">Track order</a></nav>
-      <div className="header-actions"><label className="search-box"><Search size={17}/><input aria-label="Search menu" value={search} onChange={e => setSearch(e.target.value)} placeholder="Find your favorite..." /></label><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Open cart, ${count} items`}><ShoppingBag size={19}/><span>Cart</span><b>{count}</b></button></div>
+      <div className="header-actions">{installPrompt && !isInstalled && <button className="cart-button" onClick={installApp} aria-label="Install BEA’S KIOSK"><span>Install app</span></button>}<label className="search-box"><Search size={17}/><input aria-label="Search menu" value={search} onChange={e => setSearch(e.target.value)} placeholder="Find your favorite..." /></label><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Open cart, ${count} items`}><ShoppingBag size={19}/><span>Cart</span><b>{count}</b></button></div>
     </header>
     <main id="top">
       
