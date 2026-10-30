@@ -126,7 +126,12 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [recoveryMode, setRecoveryMode] = useState(new URLSearchParams(window.location.search).get('reset-password') === 'true');
+  const [recoveryMode, setRecoveryMode] = useState(() => {
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    // Supabase may return a recovery link with a PKCE code or recovery tokens.
+    return query.get('reset-password') === 'true' || query.has('code') || hash.get('type') === 'recovery';
+  });
   const [recoveryEmailSent, setRecoveryEmailSent] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
