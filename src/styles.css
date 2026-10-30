@@ -65,3 +65,10 @@
     height: 180px;
   }
 }
+
+/* Customer-facing Regular / Daily menu switch */
+.customer-menu-tabs{display:flex;justify-content:center;gap:8px;margin:0 auto 22px;padding:5px;width:max-content;max-width:100%;background:#f1eadf;border:1px solid #e7ddce;border-radius:999px}
+.customer-menu-tabs button{border:0;background:transparent;color:#765f4c;padding:11px 23px;border-radius:999px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
+.customer-menu-tabs button.active{background:#50372a;color:#fff;box-shadow:0 3px 10px rgba(80,55,42,.15)}
+.product-photo{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;border-radius:inherit}
+@media(max-width:520px){.customer-menu-tabs{width:100%}.customer-menu-tabs button{flex:1;padding:10px 12px}}
