@@ -22,10 +22,11 @@ const products = [
   { id: 11, name: 'Cinnamon Roll Bites', category: 'Desserts', price: 1, unit: 'each', description: 'Little cinnamon-swirled bites, perfect alongside coffee.' },
   { id: 12, name: 'Pumpkin Sweet', category: 'Desserts', price: 2, unit: 'each', description: 'A sweet pumpkin treat to pair with your favorite drink.' },
 ];
-const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Signature Drinks', 'Desserts'];
+const categories = ['All Items', 'Hot Coffee', 'Iced Coffee', 'Specialty Drinks', 'Desserts'];
 const money = (value) => `$${value.toFixed(2)}`; // Currency symbol is provisional until the business currency is confirmed.
 function App() {
   const [category, setCategory] = useState('All Items');
+  const [menuType, setMenuType] = useState('regular');
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
   const [products, setProducts] = useState([]);
   const [menuLoading, setMenuLoading] = useState(true);
@@ -68,7 +69,7 @@ useEffect(() => {
       .from('menu_items')
       .select('id, name, category, price, description, image_url, tag, unit, menu_type, is_available, sort_order')
       .eq('is_available', true)
-      .eq('menu_type', 'regular')
+      .eq('menu_type', menuType)
       .order('sort_order', { ascending: true });
 
     if (error) {
@@ -90,7 +91,7 @@ useEffect(() => {
   }
 
   loadMenu();
-}, []);
+}, [menuType]);
 
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState({});
@@ -155,7 +156,7 @@ useEffect(() => {
 </section>
       <section className="category-strip" aria-label="Menu categories">{categories.slice(1).map((c,i)=><button key={c} onClick={()=>{setCategory(c);document.getElementById('menu').scrollIntoView({behavior:'smooth'});}} className="category-tile"><span className="category-icon">{i===3?<CakeSlice size={22}/>:<Coffee size={22}/>}</span><span>{c}</span><ArrowRight size={15}/></button>)}</section>
       <section className="menu-section" id="menu"><div className="section-heading"><div><span className="eyebrow">MADE TO BRIGHTEN YOUR DAY</span><h2>Find your <em>favorite.</em></h2><p>From comforting classics to little sweet treats.</p></div><div className="menu-count">{visibleProducts.length} menu items</div></div>
-        <div className="filter-row">{categories.map(c=><button key={c} className={category===c?'filter active':'filter'} onClick={()=>setCategory(c)}>{c}</button>)}</div>
+        <div className="customer-menu-tabs" role="tablist" aria-label="Choose menu"><button role="tab" aria-selected={menuType === 'regular'} className={menuType === 'regular' ? 'active' : ''} onClick={() => { setMenuType('regular'); setCategory('All Items'); }}>Regular Menu</button><button role="tab" aria-selected={menuType === 'daily'} className={menuType === 'daily' ? 'active' : ''} onClick={() => { setMenuType('daily'); setCategory('All Items'); }}>Daily Menu</button></div><div className="filter-row">{categories.map(c=><button key={c} className={category===c?'filter active':'filter'} onClick={()=>setCategory(c)}>{c}</button>)}</div>
        
 {menuLoading ? (
   <div className="empty-state">Preparing your menu...</div>
@@ -179,12 +180,12 @@ useEffect(() => {
               {String(i + 1).padStart(2, '0')}
             </span>
 
-            <div className="mini-cup">
+            {p.image_url ? <img className="product-photo" src={p.image_url} alt={p.name} loading="lazy" /> : <div className="mini-cup">
               <div className="mini-lid"></div>
               <div className="mini-body">
                 <span>{p.category === 'Desserts' ? 'SWEET' : 'BEA’S'}</span>
               </div>
-            </div>
+            </div>}
 
             {p.tag && <span className="product-tag">{p.tag}</span>}
           </div>
