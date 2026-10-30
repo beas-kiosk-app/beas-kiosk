@@ -98,12 +98,31 @@ useEffect(() => {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [trackingStatus, setTrackingStatus] = useState('');
+  const [trackingMessage, setTrackingMessage] = useState('');
+  const [trackingLoading, setTrackingLoading] = useState(false);
   const [customer, setCustomer] = useState({ name: '', phone: '', fulfilment: 'Pickup', payment: 'Mobile banking / digital wallet' });
   const visibleProducts = useMemo(() => products.filter(p => (category === 'All Items' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())), [products, category, search]);
   const cartItems = products.filter(p => cart[p.id] > 0);
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
   const subtotal = cartItems.reduce((sum, p) => sum + p.price * cart[p.id], 0);
   const changeQty = (id, delta) => setCart(old => ({ ...old, [id]: Math.max(0, (old[id] || 0) + delta) }));
+  const checkOrderStatus = async (event) => {
+    event.preventDefault();
+    const number = trackingNumber.trim().toUpperCase();
+    if (!number) return;
+    setTrackingLoading(true);
+    setTrackingStatus('');
+    setTrackingMessage('');
+    const { data, error } = await supabase.rpc('get_customer_order_status', { p_order_number: number });
+    setTrackingLoading(false);
+    if (error || !data) {
+      setTrackingMessage('We could not find that order number. Please check it and try again.');
+      return;
+    }
+    setTrackingStatus(data);
+  };
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState('');
   const placeDemoOrder = async (e) => {
@@ -134,7 +153,7 @@ useEffect(() => {
     <div className="announcement">A little comfort in every cup <span>✦</span> Freshly made with love</div>
     <header className="site-header">
       <a className="brand" href="#top" aria-label="BEA'S KIOSK home"><img src={mainLogo} alt="BEA'S KIOSK main logo" /></a>
-      <nav className="desktop-nav"><a href="#menu">Menu</a><a href="#about">Our little kiosk</a><a href="#order-info">How to order</a></nav>
+      <nav className="desktop-nav"><a href="#menu">Menu</a><a href="#about">Our little kiosk</a><a href="#order-info">How to order</a><a href="#track-order">Track order</a></nav>
       <div className="header-actions"><label className="search-box"><Search size={17}/><input aria-label="Search menu" value={search} onChange={e => setSearch(e.target.value)} placeholder="Find your favorite..." /></label><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Open cart, ${count} items`}><ShoppingBag size={19}/><span>Cart</span><b>{count}</b></button></div>
     </header>
     <main id="top">
@@ -179,6 +198,23 @@ useEffect(() => {
 <span className="spark spark-two">✦</span>
 </div>
 </section>
+      <section className="order-tracking-section" id="track-order">
+        <div className="order-tracking-copy">
+          <span className="eyebrow">YOUR ORDER, AT A GLANCE</span>
+          <h2>Track your <em>little order.</em></h2>
+          <p>Enter the order number from your confirmation to check its latest status.</p>
+        </div>
+        <form className="order-tracking-form" onSubmit={checkOrderStatus}>
+          <label htmlFor="tracking-order-number">Order number</label>
+          <div className="order-tracking-input-row">
+            <input id="tracking-order-number" value={trackingNumber} onChange={e => { setTrackingNumber(e.target.value); setTrackingStatus(''); setTrackingMessage(''); }} placeholder="e.g. BK-1234ABCD" autoCapitalize="characters" required />
+            <button className="primary-button" type="submit" disabled={trackingLoading}>{trackingLoading ? 'Checking…' : 'Track order'} <ArrowRight size={16}/></button>
+          </div>
+          {trackingStatus && <div className="order-tracking-result" role="status"><span>Current status</span><strong>{trackingStatus}</strong></div>}
+          {trackingMessage && <p className="order-tracking-error" role="alert">{trackingMessage}</p>}
+          <small>For your privacy, this page only displays the order status. It never shows customer details or other orders.</small>
+        </form>
+      </section>
       <section className="category-strip" aria-label="Menu categories">{categories.slice(1).map((c,i)=><button key={c} onClick={()=>{setCategory(c);document.getElementById('menu').scrollIntoView({behavior:'smooth'});}} className="category-tile"><span className="category-icon">{i===3?<CakeSlice size={22}/>:<Coffee size={22}/>}</span><span>{c}</span><ArrowRight size={15}/></button>)}</section>
       <section className="menu-section" id="menu"><div className="section-heading"><div><span className="eyebrow">MADE TO BRIGHTEN YOUR DAY</span><h2>Find your <em>favorite.</em></h2><p>From comforting classics to little sweet treats.</p></div><div className="menu-count">{visibleProducts.length} menu items</div></div>
         <div className="customer-menu-tabs" role="tablist" aria-label="Choose menu"><button role="tab" aria-selected={menuType === 'regular'} className={menuType === 'regular' ? 'active' : ''} onClick={() => { setMenuType('regular'); setCategory('All Items'); }}>Regular Menu</button><button role="tab" aria-selected={menuType === 'daily'} className={menuType === 'daily' ? 'active' : ''} onClick={() => { setMenuType('daily'); setCategory('All Items'); }}>Daily Menu</button></div><div className="filter-row">{categories.map(c=><button key={c} className={category===c?'filter active':'filter'} onClick={()=>setCategory(c)}>{c}</button>)}</div>
