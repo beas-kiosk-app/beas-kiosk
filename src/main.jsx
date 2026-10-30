@@ -104,7 +104,32 @@ useEffect(() => {
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
   const subtotal = cartItems.reduce((sum, p) => sum + p.price * cart[p.id], 0);
   const changeQty = (id, delta) => setCart(old => ({ ...old, [id]: Math.max(0, (old[id] || 0) + delta) }));
-  const placeDemoOrder = (e) => { e.preventDefault(); setCheckoutOpen(false); setCartOpen(false); setCart({}); setNotice('Thanks! This is a preview only. Online order submission will be activated after we connect the secure database.'); };
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [orderConfirmation, setOrderConfirmation] = useState('');
+  const placeDemoOrder = async (e) => {
+    e.preventDefault();
+    if (orderSubmitting || cartItems.length === 0) return;
+    setOrderSubmitting(true);
+    setNotice('');
+    const orderItems = cartItems.map(item => ({ id: item.id, quantity: cart[item.id] }));
+    const { data, error } = await supabase.rpc('submit_customer_order', {
+      p_customer_name: customer.name.trim(),
+      p_customer_phone: customer.phone.trim(),
+      p_fulfilment: deliveryAvailable ? customer.fulfilment : 'Pickup',
+      p_payment_method: customer.payment,
+      p_items: orderItems
+    });
+    setOrderSubmitting(false);
+    if (error) {
+      console.error('Order submission failed:', error);
+      setNotice(error.message?.includes('MENU_ITEM_UNAVAILABLE') ? 'One of your selected items is no longer available. Please refresh your cart and try again.' : 'We could not submit your order just now. Please try again or contact BEA’S KIOSK.');
+      return;
+    }
+    setCheckoutOpen(false);
+    setCartOpen(false);
+    setCart({});
+    setOrderConfirmation(typeof data === 'string' ? data : data?.order_number || '');
+  };
   return <div className="app-shell">
     <div className="announcement">A little comfort in every cup <span>✦</span> Freshly made with love</div>
     <header className="site-header">
@@ -329,18 +354,26 @@ useEffect(() => {
               <strong>{money(subtotal)}</strong>
             </div>
 
-            <button className="primary-button full" type="submit">
-              Preview checkout <ArrowRight size={17} />
+            <button className="primary-button full" type="submit" disabled={orderSubmitting}>
+              {orderSubmitting ? 'Submitting your order…' : 'Place order'} <ArrowRight size={17} />
             </button>
 
             <p className="form-footnote">
-              Preview only — orders are not submitted or saved yet.
+              Your order will be sent directly to BEA’S KIOSK.
             </p>
           </form>
         </section>
       </div>
     )}
 
+    {orderConfirmation && <div className="overlay" role="presentation">
+      <section className="checkout-modal order-confirmation" role="dialog" aria-modal="true" aria-labelledby="order-confirmation-title">
+        <div className="drawer-head"><div><span className="eyebrow">THANK YOU FOR YOUR ORDER</span><h2 id="order-confirmation-title">Order received!</h2></div><button className="icon-button" onClick={() => setOrderConfirmation('')} aria-label="Close confirmation"><X /></button></div>
+        <p>Your order has been sent to BEA’S KIOSK. Please keep this order number for reference.</p>
+        <div className="subtotal"><span>Order number</span><strong>{orderConfirmation}</strong></div>
+        <button className="primary-button full" onClick={() => setOrderConfirmation('')}>Continue browsing</button>
+      </section>
+    </div>}
     <div className="watermark" style={{backgroundImage:`url(${watermarkLogo})`}} aria-hidden="true"></div>
   </div>;
 }
