@@ -72,3 +72,18 @@
 .customer-menu-tabs button.active{background:#50372a;color:#fff;box-shadow:0 3px 10px rgba(80,55,42,.15)}
 .product-photo{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;border-radius:inherit}
 @media(max-width:520px){.customer-menu-tabs{width:100%}.customer-menu-tabs button{flex:1;padding:10px 12px}}
+
+
+.order-tracking-section{max-width:1120px;margin:34px auto 58px;padding:34px 38px;display:grid;grid-template-columns:1fr 1.1fr;gap:32px;align-items:center;background:#f5eee3;border:1px solid #e7d8c5;border-radius:22px;color:#50372a}
+.order-tracking-copy h2{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,3vw,2.3rem);margin:8px 0}
+.order-tracking-copy h2 em{color:#9a704c}
+.order-tracking-copy p{margin:0;line-height:1.6;color:#76695e}
+.order-tracking-form label{display:block;font-weight:600;margin-bottom:8px}
+.order-tracking-input-row{display:flex;gap:10px}
+.order-tracking-input-row input{min-width:0;flex:1;padding:13px 14px;border:1px solid #d8cbbb;border-radius:10px;background:#fff;color:#50372a;font:inherit}
+.order-tracking-input-row button{white-space:nowrap}
+.order-tracking-result{margin-top:14px;padding:13px 15px;border-radius:10px;background:#fff;border:1px solid #d8cbbb;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.order-tracking-result strong{color:#315b40}
+.order-tracking-error{margin:12px 0 0;color:#9a382e}
+.order-tracking-form small{display:block;margin-top:12px;line-height:1.5;color:#76695e}
+@media(max-width:720px){.order-tracking-section{margin:24px 16px 42px;padding:24px 20px;grid-template-columns:1fr;gap:20px}.order-tracking-input-row{flex-direction:column}.order-tracking-input-row button{width:100%;justify-content:center}}
