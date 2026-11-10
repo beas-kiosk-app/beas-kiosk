@@ -158,7 +158,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
       <aside className={`admin-sidebar ${mobileNavOpen ? 'is-open' : ''}`}>
         <div className="admin-brand">
           <a href="/" aria-label="Return to customer ordering page" className="admin-logo-link">
-            <img src={backupLogo} alt="BEA'S KIOSK backup logo" />
+            <img src={mainLogo} alt="BEA'S KIOSK main logo" />
           </a>
           <button className="admin-icon-button admin-mobile-close" aria-label="Close menu" onClick={() => setMobileNavOpen(false)}><X size={20}/></button>
         </div>
