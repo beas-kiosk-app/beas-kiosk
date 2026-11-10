@@ -13,9 +13,9 @@ const ranges = [
   { value: 'all', label: 'All time' },
 ];
 
-const money = value => new Intl.NumberFormat('en-US', {
-  style: 'currency', currency: 'USD'
-}).format(Number(value || 0));
+const money = value => `${Number(value || 0).toLocaleString('en-US', {
+  minimumFractionDigits: 2, maximumFractionDigits: 2
+})}`;
 
 const localDayKey = date => {
   const year = date.getFullYear();
