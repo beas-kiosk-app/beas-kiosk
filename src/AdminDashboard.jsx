@@ -7,7 +7,6 @@ import {
   Plus, ChevronDown, CalendarDays, MoreHorizontal, Leaf
 } from 'lucide-react';
 import mainLogo from './assets/beas-kiosk-main-logo.png';
-import backupLogo from './assets/beas-kiosk-cup.png.png';
 import './admin-dashboard.css';
 import MenuManagement from './MenuManagement';
 import SalesReports from './SalesReports';
