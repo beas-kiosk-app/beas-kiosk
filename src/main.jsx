@@ -131,6 +131,7 @@ useEffect(() => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [trackingStatus, setTrackingStatus] = useState('');
   const [trackingMessage, setTrackingMessage] = useState('');
+  const [trackingPaymentStatus, setTrackingPaymentStatus] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [customer, setCustomer] = useState({ name: '', phone: '', fulfilment: 'Pickup', payment: 'Mobile banking / digital wallet' });
   const visibleProducts = useMemo(() => products.filter(p => (category === 'All Items' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())), [products, category, search]);
@@ -152,14 +153,39 @@ useEffect(() => {
       return;
     }
     setTrackingStatus(data);
+    const { data: paymentData } = await supabase.rpc('get_customer_payment_status', { p_order_number: number });
+    setTrackingPaymentStatus(paymentData || null);
   };
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState('');
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [paymentInstructions, setPaymentInstructions] = useState(null);
+  const [paymentSubmissionNotice, setPaymentSubmissionNotice] = useState('');
+
+  useEffect(() => {
+    if (!checkoutOpen || customer.payment !== 'Mobile banking / digital wallet') return;
+    let active = true;
+    supabase.rpc('get_checkout_payment_instructions').then(({ data, error }) => {
+      if (active && !error) setPaymentInstructions(data || null);
+      if (active && error) console.error('Payment instructions could not be loaded:', error);
+    });
+    return () => { active = false; };
+  }, [checkoutOpen, customer.payment]);
   const placeDemoOrder = async (e) => {
     e.preventDefault();
     if (orderSubmitting || cartItems.length === 0) return;
+    const electronicPayment = customer.payment === 'Mobile banking / digital wallet';
+    if (electronicPayment && !receiptFile) {
+      setNotice('Please attach your payment receipt or screenshot before placing an electronic-payment order.');
+      return;
+    }
+    if (electronicPayment && receiptFile && (!['image/jpeg','image/png','image/webp','application/pdf'].includes(receiptFile.type) || receiptFile.size > 5 * 1024 * 1024)) {
+      setNotice('Please use a JPG, PNG, WEBP or PDF receipt no larger than 5 MB.');
+      return;
+    }
     setOrderSubmitting(true);
     setNotice('');
+    setPaymentSubmissionNotice('');
     const orderItems = cartItems.map(item => ({ id: item.id, quantity: cart[item.id] }));
     const { data, error } = await supabase.rpc('submit_customer_order', {
       p_customer_name: customer.name.trim(),
@@ -168,16 +194,35 @@ useEffect(() => {
       p_payment_method: customer.payment,
       p_items: orderItems
     });
-    setOrderSubmitting(false);
     if (error) {
+      setOrderSubmitting(false);
       console.error('Order submission failed:', error);
       setNotice(error.message?.includes('MENU_ITEM_UNAVAILABLE') ? 'One of your selected items is no longer available. Please refresh your cart and try again.' : 'We could not submit your order just now. Please try again or contact BEA’S KIOSK.');
       return;
     }
+    const orderNumber = typeof data === 'string' ? data : data?.order_number || '';
+    if (electronicPayment && orderNumber && receiptFile) {
+      const extension = receiptFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const receiptPath = `receipts/${crypto.randomUUID()}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from('payment-receipts').upload(receiptPath, receiptFile, { contentType: receiptFile.type, upsert: false });
+      if (uploadError) {
+        setPaymentSubmissionNotice('Your order was created, but the receipt upload did not finish. Please contact BEA’S KIOSK and provide your order number.');
+      } else {
+        const { error: proofError } = await supabase.rpc('submit_payment_proof', {
+          p_order_number: orderNumber,
+          p_customer_phone: customer.phone.trim(),
+          p_receipt_path: receiptPath
+        });
+        if (proofError) setPaymentSubmissionNotice('Your order was created, but we could not attach the receipt. Please contact BEA’S KIOSK with your order number.');
+        else setPaymentSubmissionNotice('Your receipt was submitted. Payment is pending owner verification.');
+      }
+    }
+    setOrderSubmitting(false);
     setCheckoutOpen(false);
     setCartOpen(false);
     setCart({});
-    setOrderConfirmation(typeof data === 'string' ? data : data?.order_number || '');
+    setReceiptFile(null);
+    setOrderConfirmation(orderNumber);
   };
   return <div className="app-shell">
     <div className="announcement">A little comfort in every cup <span>✦</span> Freshly made with love</div>
@@ -237,10 +282,10 @@ useEffect(() => {
         <form className="order-tracking-form" onSubmit={checkOrderStatus}>
           <label htmlFor="tracking-order-number">Order number</label>
           <div className="order-tracking-input-row">
-            <input id="tracking-order-number" value={trackingNumber} onChange={e => { setTrackingNumber(e.target.value); setTrackingStatus(''); setTrackingMessage(''); }} placeholder="e.g. BK-1234ABCD" autoCapitalize="characters" required />
+            <input id="tracking-order-number" value={trackingNumber} onChange={e => { setTrackingNumber(e.target.value); setTrackingStatus(''); setTrackingMessage(''); setTrackingPaymentStatus(null); }} placeholder="e.g. BK-1234ABCD" autoCapitalize="characters" required />
             <button className="primary-button" type="submit" disabled={trackingLoading}>{trackingLoading ? 'Checking…' : 'Track order'} <ArrowRight size={16}/></button>
           </div>
-          {trackingStatus && <div className="order-tracking-result" role="status"><span>Current status</span><strong>{trackingStatus}</strong></div>}
+          {trackingStatus && <div className="order-tracking-result" role="status"><span>Order status</span><strong>{trackingStatus}</strong>{trackingPaymentStatus && <><span>Payment status</span><strong>{trackingPaymentStatus.status === 'not_submitted' ? 'Not submitted' : trackingPaymentStatus.status[0].toUpperCase()+trackingPaymentStatus.status.slice(1)}</strong>{trackingPaymentStatus.rejection_reason && <small>{trackingPaymentStatus.rejection_reason}</small>}</>}</div>}
           {trackingMessage && <p className="order-tracking-error" role="alert">{trackingMessage}</p>}
           <small>For your privacy, this page only displays the order status. It never shows customer details or other orders.</small>
         </form>
@@ -405,13 +450,21 @@ useEffect(() => {
             </label>
 
             {customer.payment === 'Mobile banking / digital wallet' && (
-              <div className="payment-note">
-                <strong>Payment instructions coming soon</strong>
-                <p>
-                  Secure banking details and receipt upload will be activated
-                  after we connect the private database and owner dashboard.
-                  Do not send payment using this preview.
-                </p>
+              <div className="payment-note checkout-payment-instructions">
+                <strong>Payment instructions</strong>
+                {paymentInstructions?.bank_name || paymentInstructions?.account_name || paymentInstructions?.account_number ? <>
+                  {paymentInstructions.bank_name && <p><b>Bank / wallet:</b> {paymentInstructions.bank_name}</p>}
+                  {paymentInstructions.account_name && <p><b>Account name:</b> {paymentInstructions.account_name}</p>}
+                  {paymentInstructions.account_number && <p><b>Account number:</b> {paymentInstructions.account_number}</p>}
+                  {paymentInstructions.account_address && <p><b>Account address:</b> {paymentInstructions.account_address}</p>}
+                  {paymentInstructions.transfer_note && <p className="payment-important-note">{paymentInstructions.transfer_note}</p>}
+                </> : <p>Payment destination details have not been added by the kiosk yet. Please contact BEA’S KIOSK before transferring.</p>}
+                <label className="receipt-upload-label">
+                  Upload payment receipt / screenshot
+                  <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required onChange={e=>setReceiptFile(e.target.files?.[0] || null)} />
+                </label>
+                <small>JPG, PNG, WEBP or PDF · Maximum 5 MB. Your receipt is stored privately and can only be opened by the kiosk owner.</small>
+                {receiptFile && <p className="receipt-selected">Selected: {receiptFile.name}</p>}
               </div>
             )}
 
@@ -436,6 +489,7 @@ useEffect(() => {
       <section className="checkout-modal order-confirmation" role="dialog" aria-modal="true" aria-labelledby="order-confirmation-title">
         <div className="drawer-head"><div><span className="eyebrow">THANK YOU FOR YOUR ORDER</span><h2 id="order-confirmation-title">Order received!</h2></div><button className="icon-button" onClick={() => setOrderConfirmation('')} aria-label="Close confirmation"><X /></button></div>
         <p>Your order has been sent to BEA’S KIOSK. Please keep this order number for reference.</p>
+        {paymentSubmissionNotice && <p className={paymentSubmissionNotice.includes('pending') ? 'payment-pending-note' : 'order-tracking-error'} role="status">{paymentSubmissionNotice}</p>}
         <div className="subtotal"><span>Order number</span><strong>{orderConfirmation}</strong></div>
         <button className="primary-button full" onClick={() => setOrderConfirmation('')}>Continue browsing</button>
       </section>
