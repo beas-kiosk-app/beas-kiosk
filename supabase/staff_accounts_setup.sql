@@ -127,3 +127,43 @@ with check (public.has_kiosk_role(array['manager']));
 
 -- No staff policies are added to payment verification, payment settings,
 -- business expenses, owner profiles, or staff administration.
+
+
+-- Staff can change only the order status through this RPC.
+-- The order ID is accepted as text so this works with either UUID or numeric IDs.
+create or replace function public.staff_update_order_status(p_order_id text, p_status text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  updated_order jsonb;
+begin
+  if not (
+    public.is_kiosk_owner()
+    or public.has_kiosk_role(array['order_staff', 'manager'])
+  ) then
+    raise exception 'NOT_AUTHORIZED';
+  end if;
+
+  if p_status not in ('pending', 'preparing', 'ready', 'completed', 'cancelled') then
+    raise exception 'INVALID_ORDER_STATUS';
+  end if;
+
+  update public.orders
+     set status = p_status,
+         updated_at = now()
+   where id::text = p_order_id
+   returning to_jsonb(orders.*) into updated_order;
+
+  if updated_order is null then
+    raise exception 'ORDER_NOT_FOUND';
+  end if;
+
+  return updated_order;
+end;
+$$;
+
+revoke all on function public.staff_update_order_status(text, text) from public;
+grant execute on function public.staff_update_order_status(text, text) to authenticated;
