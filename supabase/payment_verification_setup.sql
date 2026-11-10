@@ -46,7 +46,7 @@ begin
     raise exception 'INVALID_PAYMENT_PROOF_DETAILS';
   end if;
   select * into matched_order from public.orders
-  where upper(order_number) = upper(trim(p_order_number))
+  where upper(order_number::text) = upper(trim(p_order_number))
     and regexp_replace(coalesce(customer_phone,''), '[^0-9]', '', 'g') = regexp_replace(trim(p_customer_phone), '[^0-9]', '', 'g')
   limit 1;
   if not found then raise exception 'ORDER_DETAILS_NOT_MATCHED'; end if;
@@ -66,8 +66,8 @@ grant execute on function public.submit_payment_proof(text,text,text) to anon, a
 create or replace function public.get_customer_payment_status(p_order_number text)
 returns jsonb language sql security definer set search_path = public, pg_temp as $$
   select jsonb_build_object('status',coalesce(ps.status,'not_submitted'),'rejection_reason',ps.rejection_reason)
-  from public.orders o left join public.payment_submissions ps on ps.order_number=o.order_number
-  where upper(o.order_number)=upper(trim(p_order_number)) limit 1;
+  from public.orders o left join public.payment_submissions ps on ps.order_number=o.order_number::text
+  where upper(o.order_number::text)=upper(trim(p_order_number)) limit 1;
 $$;
 revoke all on function public.get_customer_payment_status(text) from public;
 grant execute on function public.get_customer_payment_status(text) to anon, authenticated;
