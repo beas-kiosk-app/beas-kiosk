@@ -103,3 +103,63 @@
 .sales-report-note small{flex:0 0 auto;color:#98a198;font-size:8px}
 @media(max-width:900px){.sales-report-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.sales-report-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.sales-report-toolbar{flex-direction:column}.sales-report-actions{width:100%}.sales-range-control{flex:1;min-width:0}.sales-report-stats{gap:9px}.sales-report-stat{padding:13px}.sales-report-stat strong{font-size:22px}.sales-report-chart-panel,.sales-best-sellers{min-height:0}.sales-bar-chart{height:175px}.sales-bar-track{height:145px}.sales-report-note{flex-direction:column}.sales-report-note small{align-self:flex-end}}
+
+
+/* Inventory management */
+.inventory-manager{display:grid;gap:16px}
+.inventory-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:3px 0 2px}
+.inventory-heading h2{margin:8px 0 5px;color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:25px}
+.inventory-heading p{margin:0;color:#78847a;font-size:11px;line-height:1.6}
+.inventory-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.inventory-summary article{display:flex;align-items:center;gap:12px;padding:15px;background:#fff;border:1px solid #e9e9e1;border-radius:10px;box-shadow:var(--admin-shadow)}
+.inventory-summary-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:9px;background:#edf2ec;color:#31563e}
+.inventory-summary article div{display:grid;gap:4px}
+.inventory-summary small{color:#718075;font-size:10px}
+.inventory-summary strong{color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:22px}
+.inventory-success,.inventory-error{padding:11px 13px;border-radius:8px;font-size:11px;line-height:1.5}
+.inventory-success{background:#edf4ed;border:1px solid #dce9dc;color:#315b3b}
+.inventory-error{background:#fff0ed;border:1px solid #f0c9c1;color:#963d30}
+.inventory-form{border:1px solid #dfe8dd;background:#fafbf8;border-radius:10px;padding:17px}
+.inventory-form-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.inventory-form-heading strong{font-size:13px;color:#263c2d}
+.inventory-form-heading p{margin:5px 0 0;color:#7c8b7e;font-size:10px}
+.inventory-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.inventory-fields label{display:flex;flex-direction:column;gap:6px;color:#506153;font-size:10px;font-weight:700}
+.inventory-fields input,.inventory-fields select,.inventory-fields textarea{width:100%;border:1px solid #dfe5dc;border-radius:7px;padding:10px;background:#fff;color:#24372a;font:inherit;font-weight:400;outline:none}
+.inventory-fields input:focus,.inventory-fields select:focus,.inventory-fields textarea:focus{border-color:#66866d;box-shadow:0 0 0 3px rgba(102,134,109,.12)}
+.inventory-fields label.wide{grid-column:1/-1}
+.inventory-form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px}
+.inventory-form-actions .admin-secondary-button{padding:10px 14px}
+.inventory-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:5px 0 0}
+.inventory-section-head h3{margin:0 0 4px;color:#2d4232;font-size:13px}
+.inventory-section-head p{margin:0;color:#829084;font-size:10px}
+.inventory-section-head .admin-secondary-button{display:flex;align-items:center;gap:6px;padding:8px 10px}
+.inventory-list{display:grid;gap:9px}
+.inventory-item{display:flex;align-items:center;gap:12px;min-width:0;padding:13px;border:1px solid #e7ece4;border-radius:9px;background:#fff}
+.inventory-item.is-low{border-color:#e8c7a4;background:#fffaf4}
+.inventory-item-icon{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:9px;background:#edf2ec;color:#55765b}
+.inventory-item-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.inventory-item-copy strong{font-size:12px;color:#2a4030}
+.inventory-item-copy span,.inventory-item-copy small{font-size:9px;color:#7c8b7e;overflow-wrap:anywhere}
+.inventory-quantity{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:82px}
+.inventory-quantity strong{font-size:16px;color:#31563e}
+.inventory-quantity>span{font-size:9px;color:#829084}
+.inventory-quantity em{display:flex;align-items:center;gap:3px;color:#a45b28;font-size:8px;font-style:normal;font-weight:700}
+.inventory-actions{display:flex;align-items:center;gap:5px}
+.inventory-actions button{display:flex;align-items:center;justify-content:center;gap:4px;min-width:30px;height:31px;padding:0 7px;border:1px solid #e2e9df;border-radius:6px;background:#fff;color:#526a57;font:inherit;font-size:9px}
+.inventory-actions button:last-child{color:#a35d50}
+.inventory-empty{min-height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center;color:#819184;font-size:10px;background:#fafbf8;border:1px dashed #dfe6dc;border-radius:9px}
+.inventory-empty strong{color:#3f5745;font-size:12px}
+.inventory-empty .admin-primary-button{margin-top:5px}
+.inventory-empty.compact{min-height:70px}
+.inventory-history{display:grid;border:1px solid #e8ece5;border-radius:9px;background:#fff;overflow:hidden}
+.inventory-history article{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;border-bottom:1px solid #eff0ea}
+.inventory-history article:last-child{border-bottom:0}
+.inventory-history article>div{display:grid;gap:4px;min-width:0}
+.inventory-history article>div strong{color:#405b47;font-size:10px}
+.inventory-history article span,.inventory-history article small{color:#8a968c;font-size:9px;overflow-wrap:anywhere}
+.inventory-history article>strong{font-size:10px;white-space:nowrap}
+.inventory-history .positive{color:#3c7548}
+.inventory-history .negative{color:#a45b4d}
+.inventory-footnote{margin:0;color:#8a968c;font-size:9px;line-height:1.6}
+@media(max-width:700px){.inventory-heading{flex-direction:column}.inventory-heading>.admin-primary-button{width:100%;justify-content:center}.inventory-summary{grid-template-columns:1fr}.inventory-fields{grid-template-columns:1fr}.inventory-fields label.wide{grid-column:auto}.inventory-item{flex-wrap:wrap;gap:9px}.inventory-item-copy{min-width:calc(100% - 55px)}.inventory-quantity{margin-left:49px;align-items:flex-start;min-width:70px}.inventory-actions{margin-left:auto}.inventory-history article{align-items:flex-start;flex-direction:column}.inventory-history article>strong{align-self:flex-end}}
