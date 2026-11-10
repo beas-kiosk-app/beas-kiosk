@@ -96,7 +96,7 @@ export default function SalesReports() {
       const months = [...new Set(completed.map(order => {
         const d = new Date(order.created_at);
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      }))].sort().slice(-6);
+      }))].sort();
       months.forEach(key => buckets.set(key, { key, label: new Date(Number(key.slice(0, 4)), Number(key.slice(5)) - 1, 1).toLocaleDateString([], { month: 'short', year: '2-digit' }), total: 0 }));
     } else {
       const bucketStart = start || getRangeStart('7days', now);
