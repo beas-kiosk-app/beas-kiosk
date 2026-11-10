@@ -196,7 +196,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
           {active === 'Menu management' ? <MenuManagement /> : active === 'Live orders' ? <LiveOrders /> : active === 'Sales reports' ? <SalesReports /> : active !== 'Overview' ? (
             <section className="admin-coming-panel"><div className="admin-coming-icon"><Coffee size={26}/></div><h2>{active} is coming next</h2><p>This navigation and page shell are in place. We'll connect this section to the database after the dashboard layout is approved.</p><button className="admin-primary-button" onClick={() => setActive('Overview')}>Back to overview</button></section>
           ) : <>
-            <div className="admin-notice"><span className="admin-notice-mark">i</span><p><strong>Dashboard design preview</strong> — no live orders or sales are connected yet. The dashes below are intentional placeholders, not business figures.</p></div>
+            <div className="admin-notice"><span className="admin-notice-mark">i</span><p><strong>Overview summary preview</strong> — the overview cards and recent-order preview are still placeholders. Open Live orders for incoming orders and Sales reports for live completed-order figures.</p></div>
 
             <section className="admin-stat-grid" aria-label="Business summary">
               <article className="admin-stat-card"><div className="admin-stat-top"><span>Today's orders</span><span className="admin-stat-icon"><ShoppingBag size={18}/></span></div><div className="admin-stat-value">—</div><div className="admin-stat-foot"><span className="admin-muted">Waiting for order connection</span></div></article>
