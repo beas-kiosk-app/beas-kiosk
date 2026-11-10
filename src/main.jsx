@@ -416,14 +416,14 @@ useEffect(() => {
               />
             </label>
 
-            {!deliveryAvailable && (
+            {(!pickupAvailable || !deliveryAvailable) && (
               <div
                 className="payment-note"
                 role="status"
                 style={{ borderColor: '#d7ae75' }}
               >
-                <strong>Pickup only at this time</strong>
-                <p>{deliveryUnavailableMessage}</p>
+                <strong>{!pickupAvailable && deliveryAvailable ? 'Delivery only at this time' : 'Pickup only at this time'}</strong>
+                <p>{!deliveryAvailable ? deliveryUnavailableMessage : 'Pickup is temporarily unavailable. Delivery is available.'}</p>
               </div>
             )}
 
