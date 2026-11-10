@@ -58,7 +58,7 @@ export default function MenuManagement() {
       ? await supabase.from('menu_items').insert(payload)
       : await supabase.from('menu_items').update(payload).eq('id', editing);
     setSaving(false);
-    if (result.error) { setError('Could not save this item. Please check your Supabase table permissions and required columns.'); return; }
+    if (result.error) { const details = [result.error.message, result.error.details, result.error.hint].filter(Boolean).join(' — '); setError(`Could not save this item: ${details || 'Unknown Supabase error'}${result.error.code ? ` (code: ${result.error.code})` : ''}`); return; }
     closeForm(); setNotice('Menu item saved successfully.'); await loadItems();
   };
 
