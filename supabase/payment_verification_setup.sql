@@ -72,3 +72,23 @@ $$;
 revoke all on function public.get_customer_payment_status(text) from public;
 grant execute on function public.get_customer_payment_status(text) to anon, authenticated;
 create index if not exists payment_submissions_status_date_idx on public.payment_submissions(status,submitted_at desc);
+
+
+-- Safe public checkout lookup: exposes only the payment destination details, not owner controls.
+create or replace function public.get_checkout_payment_instructions()
+returns jsonb
+language sql
+security definer
+set search_path = public, pg_temp
+as $$
+  select jsonb_build_object(
+    'bank_name', bank_name,
+    'account_name', account_name,
+    'account_number', account_number,
+    'account_address', account_address,
+    'transfer_note', transfer_note
+  )
+  from public.payment_settings where id = 1;
+$$;
+revoke all on function public.get_checkout_payment_instructions() from public;
+grant execute on function public.get_checkout_payment_instructions() to anon, authenticated;
