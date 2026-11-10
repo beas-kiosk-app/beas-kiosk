@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff, ImagePlus, X, Save, Coffee, RefreshC
 
 const categories = ['Hot Coffee', 'Iced Coffee', 'Specialty Drinks', 'Desserts'];
 const blankItem = { name: '', category: 'Hot Coffee', price: '', description: '', image_url: '', tag: '', unit: '', menu_type: 'regular', is_available: true, sort_order: 0 };
+const textValue = (value) => typeof value === 'string' ? value : '';
 
 export default function MenuManagement() {
   const [items, setItems] = useState([]);
@@ -29,12 +30,12 @@ export default function MenuManagement() {
   useEffect(() => { loadItems(); }, []);
 
   const startNew = () => { setEditing('new'); setForm({ ...blankItem, menu_type: menuType, sort_order: items.length }); setPhoto(null); setError(''); setNotice(''); };
-  const startEdit = (item) => { setEditing(item.id); setForm({ ...blankItem, ...item, price: String(item.price), menu_type: item.menu_type || 'regular' }); setPhoto(null); setError(''); setNotice(''); };
+  const startEdit = (item) => { setEditing(item.id); setForm({ ...blankItem, ...item, name: textValue(item.name), description: textValue(item.description), image_url: textValue(item.image_url), tag: textValue(item.tag), unit: textValue(item.unit), price: item.price == null ? '' : String(item.price), menu_type: item.menu_type || 'regular' }); setPhoto(null); setError(''); setNotice(''); };
   const closeForm = () => { setEditing(null); setPhoto(null); setForm(blankItem); };
 
   const saveItem = async (event) => {
     event.preventDefault(); setSaving(true); setError(''); setNotice('');
-    let imageUrl = form.image_url?.trim() || null;
+    let imageUrl = textValue(form.image_url).trim() || null;
     if (photo) {
       const safeName = photo.name.toLowerCase().replace(/[^a-z0-9._-]/g, '-');
       const path = `${Date.now()}-${safeName}`;
@@ -47,9 +48,9 @@ export default function MenuManagement() {
       imageUrl = supabase.storage.from('menu-images').getPublicUrl(path).data.publicUrl;
     }
     const payload = {
-      name: form.name.trim(), category: form.category, price: Number(form.price),
-      description: form.description.trim(), image_url: imageUrl,
-      tag: form.tag.trim() || null, unit: form.unit.trim() || null,
+      name: textValue(form.name).trim(), category: form.category, price: Number(form.price),
+      description: textValue(form.description).trim(), image_url: imageUrl,
+      tag: textValue(form.tag).trim() || null, unit: textValue(form.unit).trim() || null,
       menu_type: form.menu_type, is_available: Boolean(form.is_available),
       sort_order: Number(form.sort_order) || 0
     };
