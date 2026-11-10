@@ -69,6 +69,12 @@ begin
   if found and (not cfg.store_open or not cfg.accepting_orders) then
     raise exception 'STORE_NOT_ACCEPTING_ORDERS';
   end if;
+  if found and lower(trim(coalesce(new.fulfilment, ''))) = 'pickup' and not cfg.pickup_available then
+    raise exception 'FULFILMENT_NOT_AVAILABLE';
+  end if;
+  if found and lower(trim(coalesce(new.fulfilment, ''))) = 'delivery' and not cfg.delivery_available then
+    raise exception 'FULFILMENT_NOT_AVAILABLE';
+  end if;
   return new;
 end;
 $$;
