@@ -63,6 +63,9 @@ function App() {
   const [acceptingOrders, setAcceptingOrders] = useState(true);
   const [closedMessage, setClosedMessage] = useState('We are currently closed and will be happy to serve you when we reopen.');
   const [businessName, setBusinessName] = useState("BEA'S KIOSK");
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [businessAddress, setBusinessAddress] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [products, setProducts] = useState([]);
   const [menuLoading, setMenuLoading] = useState(true);
@@ -87,6 +90,9 @@ useEffect(() => {
       setClosedMessage(data.closed_message || 'We are currently closed and will be happy to serve you when we reopen.');
       setDeliveryUnavailableMessage(data.delivery_unavailable_message || 'Delivery is temporarily unavailable. Pickup is available for all orders.');
       setBusinessName(data.business_name || "BEA'S KIOSK");
+      setContactPhone(data.contact_phone || '');
+      setContactEmail(data.contact_email || '');
+      setBusinessAddress(data.business_address || '');
       setOpeningHours(Array.isArray(data.opening_hours) ? data.opening_hours : []);
       return;
     }
@@ -209,7 +215,7 @@ useEffect(() => {
     if (error) {
       setOrderSubmitting(false);
       console.error('Order submission failed:', error);
-      setNotice(error.message?.includes('MENU_ITEM_UNAVAILABLE') ? 'One of your selected items is no longer available. Please refresh your cart and try again.' : 'We could not submit your order just now. Please try again or contact BEA’S KIOSK.');
+      setNotice(error.message?.includes('MENU_ITEM_UNAVAILABLE') ? 'One of your selected items is no longer available. Please refresh your cart and try again.' : error.message?.includes('STORE_NOT_ACCEPTING_ORDERS') ? (closedMessage || 'The kiosk is not accepting orders right now.') : error.message?.includes('FULFILMENT_NOT_AVAILABLE') ? 'That fulfilment option is no longer available. Please refresh and choose another option.' : 'We could not submit your order just now. Please try again or contact BEA’S KIOSK.');
       return;
     }
     const orderNumber = typeof data === 'string' ? data : data?.order_number || '';
@@ -359,9 +365,9 @@ useEffect(() => {
 
       </section>
       <section className="order-info" id="order-info"><div className="info-icon"><Clock3 size={25}/></div><div><span className="eyebrow">EASY AS ONE, TWO, SIP</span><h2>Order your way.</h2><p>Choose pickup or delivery at checkout. Electronic payment instructions and receipt upload will be available after secure payment setup is complete.</p></div><a className="text-link" href="#menu">Browse the menu <ArrowRight size={16}/></a></section>
-      <section className="about-section" id="about"><img src={mainLogo} alt="BEA'S KIOSK"/><div><span className="eyebrow">A WARM WELCOME, ALWAYS</span><h2>A little kiosk, <em>a lot of heart.</em></h2><p>Thanks for stopping by. We’re happy to be part of your everyday coffee moments.</p></div></section>
+      <section className="about-section" id="about"><img src={mainLogo} alt={businessName}/><div><span className="eyebrow">A WARM WELCOME, ALWAYS</span><h2>A little kiosk, <em>a lot of heart.</em></h2><p>Thanks for stopping by. We’re happy to be part of your everyday coffee moments at {businessName}.</p>{(contactPhone || contactEmail || businessAddress || openingHours.length > 0) && <div className="business-contact-details">{businessAddress && <p><strong>Location:</strong> {businessAddress}</p>}{contactPhone && <p><strong>Phone:</strong> <a href={`tel:${contactPhone}`}>{contactPhone}</a></p>}{contactEmail && <p><strong>Email:</strong> <a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>}{openingHours.length > 0 && <div className="business-hours-list"><strong>Store hours</strong>{openingHours.map(day => <span key={day.day}>{day.day}: {day.enabled ? `${day.open}–${day.close}` : 'Closed'}</span>)}</div>}</div>}</div></section>
     </main>
-    <footer><span>© {new Date().getFullYear()} BEA’S KIOSK</span><span>Made with warmth <span className="heart">♥</span></span><span>Fresh coffee, happy moments.</span></footer>
+    <footer><span>© {new Date().getFullYear()} {businessName}</span><span>Made with warmth <span className="heart">♥</span></span><span>Fresh coffee, happy moments.</span></footer>
     {notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="Dismiss"><X size={16}/></button></div>}
     {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR LITTLE ORDER</span><h2>Your cart ({count})</h2></div><button className="icon-button" onClick={()=>setCartOpen(false)} aria-label="Close cart"><X/></button></div>{cartItems.length===0?<div className="empty-cart"><ShoppingBag size={35}/><h3>Your cart is waiting.</h3><p>Add a coffee or treat to get started.</p><button className="primary-button" onClick={()=>setCartOpen(false)}>Explore menu</button></div>:<><div className="cart-list">{cartItems.map(p=><div className="cart-line" key={p.id}><div className="cart-dot"><Coffee size={18}/></div><div className="cart-product"><strong>{p.name}</strong><span>{money(p.price)}{p.unit?` / ${p.unit}`:''}</span><div className="qty-control"><button onClick={()=>changeQty(p.id,-1)} aria-label={`Remove one ${p.name}`}><Minus size={13}/></button><span>{cart[p.id]}</span><button onClick={()=>changeQty(p.id,1)} aria-label={`Add one ${p.name}`}><Plus size={13}/></button></div></div><strong>{money(p.price*cart[p.id])}</strong></div>)}</div><div className="cart-bottom"><div className="subtotal"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><p>Delivery fees, if applicable, will be confirmed before order submission.</p><button className="primary-button full" disabled={!ordersEnabled} onClick={()=>{setCartOpen(false);setCheckoutOpen(true);}}>{ordersEnabled ? 'Continue to checkout' : 'Ordering unavailable'} <ArrowRight size={17}/></button></div></>}</aside></div>}
     
@@ -430,7 +436,6 @@ useEffect(() => {
                   setCustomer({ ...customer, fulfilment: e.target.value })
                 }
               >
-                <option>Pickup</option>
                 {pickupAvailable && <option>Pickup</option>}{deliveryAvailable && <option>Delivery</option>}
               </select>
             </label>
