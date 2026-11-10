@@ -108,3 +108,6 @@
 .business-hours-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;margin-top:5px}
 .business-hours-list>strong{grid-column:1/-1;margin-bottom:2px;color:#50372a}
 @media(max-width:600px){.business-hours-list{grid-template-columns:1fr}}
+
+.add-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.primary-button:disabled{opacity:.55;cursor:not-allowed}
