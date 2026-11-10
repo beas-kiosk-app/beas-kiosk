@@ -87,3 +87,14 @@
 .order-tracking-error{margin:12px 0 0;color:#9a382e}
 .order-tracking-form small{display:block;margin-top:12px;line-height:1.5;color:#76695e}
 @media(max-width:720px){.order-tracking-section{margin:24px 16px 42px;padding:24px 20px;grid-template-columns:1fr;gap:20px}.order-tracking-input-row{flex-direction:column}.order-tracking-input-row button{width:100%;justify-content:center}}
+
+
+/* Customer payment instructions and private receipt upload */
+.checkout-payment-instructions{display:grid;gap:8px}
+.checkout-payment-instructions p{margin:2px 0}
+.checkout-payment-instructions .payment-important-note{padding:9px 11px;border:1px solid #e8b8ad;border-radius:8px;background:#fff0ed;color:#a33f32;font-weight:700}
+.receipt-upload-label{display:grid;gap:7px;margin-top:7px;font-weight:700}
+.receipt-upload-label input{width:100%;padding:10px;border:1px dashed #b9a58f;border-radius:8px;background:#fffdf8;color:#50372a}
+.checkout-payment-instructions>small{color:#77685c;font-size:11px;line-height:1.5}
+.checkout-payment-instructions .receipt-selected{font-size:12px;font-weight:700;color:#31563e;overflow-wrap:anywhere}
+.payment-pending-note{padding:11px 13px;border:1px solid #d7ae75;border-radius:9px;background:#fff8e9;color:#765322;font-size:13px}
