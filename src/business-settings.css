@@ -1,0 +1,46 @@
+
+/* Business settings */
+.business-settings{display:grid;gap:15px;min-width:0}
+.business-settings-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;flex-wrap:wrap}
+.business-settings-intro h2{margin:7px 0 5px;color:var(--admin-forest);font:26px 'Playfair Display',serif}
+.business-settings-intro p{margin:0;color:#78847a;font-size:11px;line-height:1.6}
+.business-settings-private{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:20px;background:#edf2ec;color:#55705a;font-size:9px;font-weight:700}
+.business-settings-card{display:grid;gap:16px;padding:19px;background:#fff;border:1px solid #e7ece4;border-radius:11px;box-shadow:var(--admin-shadow);min-width:0}
+.business-settings-card-title{display:flex;align-items:flex-start;gap:11px}
+.business-settings-card-title>span{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:9px;background:#edf2ec;color:#45694d}
+.business-settings-card-title h3{margin:1px 0 4px;color:var(--admin-forest);font:19px 'Playfair Display',serif}
+.business-settings-card-title p{margin:0;color:#829084;font-size:10px;line-height:1.5}
+.business-settings-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.business-settings-fields label,.business-settings-full-field{display:grid;gap:6px;color:#536457;font-size:10px;font-weight:650;min-width:0}
+.business-settings-fields input,.business-settings-full-field textarea,.business-hours-row input[type=time]{width:100%;min-width:0;box-sizing:border-box;padding:10px 11px;border:1px solid #dfe6dc;border-radius:7px;background:#fff;color:#405b47;font:inherit;font-size:11px}
+.business-settings-full-field textarea{resize:vertical;line-height:1.5}
+.business-hours-list{display:grid;border:1px solid #e8ece5;border-radius:9px;overflow:hidden}
+.business-hours-row{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(110px,1fr) minmax(110px,1fr);align-items:center;gap:12px;padding:9px 13px;border-bottom:1px solid #eff1eb}
+.business-hours-row:last-child{border-bottom:0}
+.business-hours-row>label:not(.business-hours-day){display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:7px;color:#8a968c;font-size:9px}
+.business-hours-row input[type=time]{padding:7px;font-size:10px}
+.business-hours-day{display:flex;align-items:center;gap:8px;color:#536457;font-size:11px}
+.business-hours-day input,.business-settings-toggle-list input{accent-color:#31563e;width:16px;height:16px}
+.business-hours-closed{grid-column:2/4;color:#9a6b48;font-size:10px}
+.business-settings-toggle-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:13px 14px;border:1px solid #e8ece5;border-radius:9px;background:#fafbf8}
+.business-settings-toggle-row>div,.business-settings-toggle-list label>span{display:grid;gap:4px}
+.business-settings-toggle-row strong,.business-settings-toggle-list strong{color:#405b47;font-size:11px}
+.business-settings-toggle-row small,.business-settings-toggle-list small{color:#89958b;font-size:9px;line-height:1.5}
+.business-toggle{width:44px;height:25px;padding:3px;border:0;border-radius:20px;background:#cbd3c9;flex:0 0 auto}
+.business-toggle i{display:block;width:19px;height:19px;border-radius:50%;background:#fff;transition:transform .18s}
+.business-toggle.on{background:#31563e}
+.business-toggle.on i{transform:translateX(19px)}
+.business-settings-toggle-list{display:grid;border:1px solid #e8ece5;border-radius:9px;overflow:hidden}
+.business-settings-toggle-list label{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid #eff1eb}
+.business-settings-toggle-list label:last-child{border-bottom:0}
+.business-settings-toggle-list input{flex:0 0 auto}
+.business-settings-warning{margin:0;color:#a34d40;font-size:10px}
+.business-settings-save{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.business-settings-save>span{color:#89958b;font-size:9px;line-height:1.5}
+.business-settings-save button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.business-security-card{margin-top:2px}
+.business-settings-notice{display:flex;align-items:center;gap:8px;padding:11px 13px;border-radius:8px;font-size:10px;line-height:1.5}
+.business-settings-notice.success{background:#edf5ed;color:#3d7148;border:1px solid #d9e8d9}
+.business-settings-notice.error{background:#fff3ef;color:#a34d40;border:1px solid #f0ddd6}
+.business-settings-loading{padding:30px;text-align:center;color:#7d8b7f;font-size:11px}
+@media(max-width:700px){.business-settings-card{padding:14px}.business-settings-fields{grid-template-columns:1fr}.business-hours-row{grid-template-columns:1fr 1fr;gap:8px}.business-hours-day{grid-column:1/-1}.business-hours-closed{grid-column:1/-1}.business-settings-save{align-items:stretch;flex-direction:column}.business-settings-save button{width:100%;min-height:42px}.business-settings-intro h2{font-size:23px}}
