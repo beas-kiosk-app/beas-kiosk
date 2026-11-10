@@ -192,7 +192,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
 
         <div className="admin-content">
           <div className="admin-welcome-row">
-            <div><div className="admin-eyebrow"><span /> YOUR BUSINESS AT A GLANCE</div><h1>{active === 'Overview' ? 'Good things are brewing.' : active}</h1><p>{active === 'Overview' ? 'Here is your kiosk overview. Live figures will appear when the dashboard is connected to orders and sales.' : `Your ${active.toLowerCase()} workspace. This section will be connected in the next build stage.`}</p></div>
+            <div><div className="admin-eyebrow"><span /> YOUR BUSINESS AT A GLANCE</div><h1>{active === 'Overview' ? 'Good things are brewing.' : active}</h1><p>{active === 'Overview' ? 'Here is your kiosk overview. Live figures will appear when the dashboard is connected to orders and sales.' : active === 'Settings' ? 'Update your business details, opening hours, store availability and owner account.' : `Your ${active.toLowerCase()} workspace. This section will be connected in the next build stage.`}</p></div>
             <button className="admin-date-button"><CalendarDays size={16}/> Today <ChevronDown size={15}/></button>
           </div>
 
