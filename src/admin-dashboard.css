@@ -209,3 +209,46 @@
 .expenses-entry-actions button:last-child{color:#a35d50}
 @media(max-width:900px){.expenses-lower-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.expenses-toolbar{flex-direction:column}.expenses-toolbar .sales-report-actions{width:100%;justify-content:stretch}.expenses-toolbar .sales-range-control{flex:1}.expenses-toolbar .admin-primary-button{justify-content:center}.expenses-stats{grid-template-columns:1fr}.expenses-stats article{padding:14px}.expenses-history article{align-items:flex-start;flex-wrap:wrap}.expenses-entry-copy{min-width:calc(100% - 10px)}.expenses-entry-amount{margin-left:auto}.expenses-entry-actions{margin-left:auto}}
+
+
+/* Payment verification */
+.payment-verification{display:grid;gap:16px}
+.payment-verification-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.payment-verification-toolbar h2{margin:8px 0 5px;color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:25px}
+.payment-verification-toolbar p{margin:0;color:#78847a;font-size:11px;line-height:1.6}
+.payment-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.payment-summary article{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:4px 10px;padding:14px 16px;background:#fff;border:1px solid #e8ece5;border-radius:10px}
+.payment-summary article svg{grid-row:span 2;color:#58765d}
+.payment-summary article span{font-size:10px;color:#7b897e}
+.payment-summary article strong{font-size:20px;color:var(--admin-forest)}
+.payment-settings-panel{padding:18px}
+.payment-settings-panel .admin-panel-heading h2{display:flex;align-items:center;gap:8px}
+.payment-settings-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}
+.payment-settings-fields label{display:grid;gap:6px;color:#536457;font-size:10px;font-weight:650}
+.payment-settings-fields input,.payment-reject-row input{width:100%;min-width:0;padding:10px 11px;border:1px solid #dfe6dc;border-radius:7px;background:#fff;color:#405b47;font:inherit;font-size:11px;box-sizing:border-box}
+.payment-settings-fields .payment-note-field{grid-column:1/-1}
+.payment-settings-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px;padding-top:13px;border-top:1px solid #edf0e9}
+.payment-settings-actions>span{font-size:9px;color:#8a968c}
+.payment-settings-actions button{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.payment-list-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.payment-list-heading h3{margin:0;color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:19px}
+.payment-list-heading p{margin:4px 0 0;color:#8a968c;font-size:10px}
+.payment-filter{display:flex;gap:5px;flex-wrap:wrap}
+.payment-filter button{padding:7px 10px;border:1px solid #e1e8df;border-radius:7px;background:#fff;color:#6d7d70;font-size:10px}
+.payment-filter button.active{background:#31563e;color:#fff;border-color:#31563e}
+.payment-submission-list{display:grid;gap:11px}
+.payment-submission-card{display:grid;gap:12px;padding:15px;background:#fff;border:1px solid #e7ece4;border-radius:10px}
+.payment-submission-main{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.payment-submission-main>div{display:grid;gap:4px;min-width:0}
+.payment-submission-main strong{color:#405b47;font-size:13px}
+.payment-submission-main span:not(.payment-status-pill),.payment-submission-main small{color:#879389;font-size:10px}
+.payment-status-pill{padding:5px 9px;border-radius:20px;background:#fff4dc;color:#9a702a;font-size:9px;font-weight:700;text-transform:capitalize}
+.payment-status-pill.verified{background:#eaf4eb;color:#397448}
+.payment-status-pill.rejected{background:#fff0ed;color:#a34d40}
+.payment-submission-actions{display:flex;gap:8px;flex-wrap:wrap}
+.payment-submission-actions button{display:flex;align-items:center;gap:6px}
+.payment-reject-row{display:flex;gap:8px}
+.payment-reject-row input{flex:1}
+.payment-reject-button{display:flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid #efd7d2;border-radius:7px;background:#fff7f5;color:#a34d40;font-size:10px;white-space:nowrap}
+.payment-rejection-reason{margin:0;color:#a34d40;font-size:10px}
+@media(max-width:700px){.payment-verification-toolbar{flex-direction:column}.payment-summary{grid-template-columns:1fr}.payment-settings-fields{grid-template-columns:1fr}.payment-settings-fields .payment-note-field{grid-column:auto}.payment-settings-actions{align-items:stretch;flex-direction:column}.payment-settings-actions button{justify-content:center}.payment-reject-row{flex-direction:column}.payment-list-heading{align-items:flex-start;flex-direction:column}}
