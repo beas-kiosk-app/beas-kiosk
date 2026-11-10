@@ -456,8 +456,8 @@ useEffect(() => {
                   {paymentInstructions.bank_name && <p><b>Bank / wallet:</b> {paymentInstructions.bank_name}</p>}
                   {paymentInstructions.account_name && <p><b>Account name:</b> {paymentInstructions.account_name}</p>}
                   {paymentInstructions.account_number && <p><b>Account number:</b> {paymentInstructions.account_number}</p>}
-                  {paymentInstructions.account_address && <p><b>Account address:</b> {paymentInstructions.account_address}</p>}
-                  {paymentInstructions.transfer_note && <p className="payment-important-note">{paymentInstructions.transfer_note}</p>}
+                  {paymentInstructions.account_address && paymentInstructions.bank_name?.toLowerCase().includes('atlantic') && <p><b>Account address:</b> {paymentInstructions.account_address}</p>}
+                  {paymentInstructions.transfer_note && (!paymentInstructions.transfer_note.toLowerCase().includes('atlantic') || paymentInstructions.bank_name?.toLowerCase().includes('atlantic')) && <p className="payment-important-note">{paymentInstructions.transfer_note}</p>}
                 </> : <p>Payment destination details have not been added by the kiosk yet. Please contact BEA’S KIOSK before transferring.</p>}
                 <label className="receipt-upload-label">
                   Upload payment receipt / screenshot
