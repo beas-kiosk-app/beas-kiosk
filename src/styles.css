@@ -98,3 +98,13 @@
 .checkout-payment-instructions>small{color:#77685c;font-size:11px;line-height:1.5}
 .checkout-payment-instructions .receipt-selected{font-size:12px;font-weight:700;color:#31563e;overflow-wrap:anywhere}
 .payment-pending-note{padding:11px 13px;border:1px solid #d7ae75;border-radius:9px;background:#fff8e9;color:#765322;font-size:13px}
+
+
+/* Customer-facing business profile details from owner Settings */
+.business-contact-details{display:grid;gap:7px;margin-top:16px;color:#6f5a4a;font-size:12px;line-height:1.55}
+.business-contact-details p{margin:0}
+.business-contact-details strong{color:#50372a}
+.business-contact-details a{color:#79573f;text-decoration:underline;text-underline-offset:2px}
+.business-hours-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;margin-top:5px}
+.business-hours-list>strong{grid-column:1/-1;margin-bottom:2px;color:#50372a}
+@media(max-width:600px){.business-hours-list{grid-template-columns:1fr}}
