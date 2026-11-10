@@ -102,7 +102,7 @@ export default function InventoryManagement() {
     event.preventDefault();
     if (!stockItem) return;
     const amount = numberValue(movementAmount);
-    if (!(amount > 0)) { setError('Enter a quantity greater than zero.'); return; }
+    if (!Number.isFinite(amount) || amount < 0 || (movementType !== 'adjustment' && amount === 0)) { setError(movementType === 'adjustment' ? 'Enter a valid stock count.' : 'Enter a quantity greater than zero.'); return; }
     const current = numberValue(stockItem.quantity);
     const next = movementType === 'restock' ? current + amount : movementType === 'usage' ? current - amount : amount;
     if (next < 0) { setError('That amount is more than the current stock.'); return; }
