@@ -163,3 +163,49 @@
 .inventory-history .negative{color:#a45b4d}
 .inventory-footnote{margin:0;color:#8a968c;font-size:9px;line-height:1.6}
 @media(max-width:700px){.inventory-heading{flex-direction:column}.inventory-heading>.admin-primary-button{width:100%;justify-content:center}.inventory-summary{grid-template-columns:1fr}.inventory-fields{grid-template-columns:1fr}.inventory-fields label.wide{grid-column:auto}.inventory-item{flex-wrap:wrap;gap:9px}.inventory-item-copy{min-width:calc(100% - 55px)}.inventory-quantity{margin-left:49px;align-items:flex-start;min-width:70px}.inventory-actions{margin-left:auto}.inventory-history article{align-items:flex-start;flex-direction:column}.inventory-history article>strong{align-self:flex-end}}
+
+
+/* Expenses & profit */
+.expenses-profit{display:grid;gap:16px}
+.expenses-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.expenses-toolbar h2{margin:8px 0 5px;color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:25px}
+.expenses-toolbar p{margin:0;color:#78847a;font-size:11px;line-height:1.6;max-width:600px}
+.expenses-toolbar .sales-report-actions{flex-wrap:wrap;justify-content:flex-end}
+.expenses-toolbar .admin-primary-button{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.expenses-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.expenses-stats article{display:flex;flex-direction:column;gap:7px;min-width:0;padding:17px;background:#fff;border:1px solid #e9e9e1;border-radius:10px;box-shadow:var(--admin-shadow)}
+.expenses-stat-icon{display:grid;place-items:center;width:35px;height:35px;border-radius:9px;background:#edf2ec;color:#31563e}
+.expenses-stats small{color:#718075;font-size:10px;font-weight:600}
+.expenses-stats strong{color:var(--admin-forest);font-family:'Playfair Display',serif;font-size:25px;overflow-wrap:anywhere}
+.expenses-stats em{color:#929d93;font-size:9px;font-style:normal}
+.expenses-stats article.profit-positive .expenses-stat-icon{background:#edf4ed;color:#3c7548}
+.expenses-stats article.profit-negative .expenses-stat-icon{background:#fff0ed;color:#a34d40}
+.expenses-stats article.profit-negative strong{color:#a34d40}
+.expenses-lower-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,1fr);gap:15px}
+.expenses-breakdown,.expenses-guidance{min-height:245px}
+.expenses-breakdown>.admin-panel-heading>svg,.expenses-guidance>.admin-panel-heading>svg{color:#66856a}
+.expenses-category-list{display:grid;gap:16px;margin-top:20px}
+.expenses-category-list>div>div:first-child{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}
+.expenses-category-list strong{font-size:10px;color:#536457}
+.expenses-category-list b{font-size:10px;color:#31563e}
+.expenses-category-track{height:8px;border-radius:20px;background:#edf1eb;overflow:hidden}
+.expenses-category-track i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#8ca88d,#31563e)}
+.expenses-equation{display:grid;grid-template-columns:1fr auto;gap:10px;padding:16px 0}
+.expenses-equation>span{font-size:10px;color:#77857a}
+.expenses-equation>strong{font-size:11px;color:#405b47;text-align:right}
+.expenses-equation>div{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;border-top:1px solid #e9eee7;padding-top:13px;margin-top:3px}
+.expenses-equation>div span{font-size:11px;font-weight:700;color:#31563e}
+.expenses-equation>div strong{font-size:16px;color:#31563e}
+.expenses-guidance>p{margin:0;color:#89958b;font-size:9px;line-height:1.65}
+.expenses-history{display:grid;border:1px solid #e8ece5;border-radius:9px;background:#fff;overflow:hidden}
+.expenses-history article{display:flex;align-items:center;gap:12px;padding:12px 13px;border-bottom:1px solid #eff0ea}
+.expenses-history article:last-child{border-bottom:0}
+.expenses-entry-copy{display:grid;gap:4px;min-width:0;flex:1}
+.expenses-entry-copy strong{font-size:11px;color:#405b47;overflow-wrap:anywhere}
+.expenses-entry-copy span,.expenses-entry-copy small{font-size:9px;color:#8a968c;overflow-wrap:anywhere}
+.expenses-entry-amount{font-size:11px;color:#a34d40;white-space:nowrap}
+.expenses-entry-actions{display:flex;gap:5px}
+.expenses-entry-actions button{display:grid;place-items:center;width:30px;height:30px;border:1px solid #e2e9df;border-radius:6px;background:#fff;color:#526a57}
+.expenses-entry-actions button:last-child{color:#a35d50}
+@media(max-width:900px){.expenses-lower-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.expenses-toolbar{flex-direction:column}.expenses-toolbar .sales-report-actions{width:100%;justify-content:stretch}.expenses-toolbar .sales-range-control{flex:1}.expenses-toolbar .admin-primary-button{justify-content:center}.expenses-stats{grid-template-columns:1fr}.expenses-stats article{padding:14px}.expenses-history article{align-items:flex-start;flex-wrap:wrap}.expenses-entry-copy{min-width:calc(100% - 10px)}.expenses-entry-amount{margin-left:auto}.expenses-entry-actions{margin-left:auto}}
