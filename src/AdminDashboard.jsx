@@ -7,6 +7,7 @@ import {
   Plus, ChevronDown, CalendarDays, MoreHorizontal, Leaf
 } from 'lucide-react';
 import mainLogo from './assets/beas-kiosk-main-logo.png';
+import backupLogo from './assets/beas-kiosk-cup.png.png';
 import './admin-dashboard.css';
 import MenuManagement from './MenuManagement';
 import SalesReports from './SalesReports';
@@ -158,7 +159,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
       <aside className={`admin-sidebar ${mobileNavOpen ? 'is-open' : ''}`}>
         <div className="admin-brand">
           <a href="/" aria-label="Return to customer ordering page" className="admin-logo-link">
-            <img src={mainLogo} alt="BEA'S KIOSK main logo" />
+            <img src={backupLogo} alt="BEA'S KIOSK backup logo" />
           </a>
           <button className="admin-icon-button admin-mobile-close" aria-label="Close menu" onClick={() => setMobileNavOpen(false)}><X size={20}/></button>
         </div>
