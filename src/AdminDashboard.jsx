@@ -9,6 +9,7 @@ import {
 import mainLogo from './assets/beas-kiosk-main-logo.png';
 import './admin-dashboard.css';
 import MenuManagement from './MenuManagement';
+import SalesReports from './SalesReports';
 
 const navigation = [
   { label: 'Overview', icon: LayoutDashboard },
@@ -192,7 +193,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
             <button className="admin-date-button"><CalendarDays size={16}/> Today <ChevronDown size={15}/></button>
           </div>
 
-          {active === 'Menu management' ? <MenuManagement /> : active === 'Live orders' ? <LiveOrders /> : active !== 'Overview' ? (
+          {active === 'Menu management' ? <MenuManagement /> : active === 'Live orders' ? <LiveOrders /> : active === 'Sales reports' ? <SalesReports /> : active !== 'Overview' ? (
             <section className="admin-coming-panel"><div className="admin-coming-icon"><Coffee size={26}/></div><h2>{active} is coming next</h2><p>This navigation and page shell are in place. We'll connect this section to the database after the dashboard layout is approved.</p><button className="admin-primary-button" onClick={() => setActive('Overview')}>Back to overview</button></section>
           ) : <>
             <div className="admin-notice"><span className="admin-notice-mark">i</span><p><strong>Dashboard design preview</strong> — no live orders or sales are connected yet. The dashes below are intentional placeholders, not business figures.</p></div>
