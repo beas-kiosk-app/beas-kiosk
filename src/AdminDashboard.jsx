@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import {
   LayoutDashboard, ShoppingBag, Coffee, ChartNoAxesCombined, Package,
-  Wallet, CreditCard, Users, Settings, Bell, Search, Menu, X,
+  Wallet, CreditCard, Settings, Bell, Search, Menu, X,
   ArrowUpRight, Clock3, CheckCircle2, CircleDollarSign, TrendingUp,
   Plus, ChevronDown, CalendarDays, MoreHorizontal, Leaf
 } from 'lucide-react';
@@ -22,7 +22,6 @@ const navigation = [
   { label: 'Inventory', icon: Package },
   { label: 'Expenses & profit', icon: Wallet },
   { label: 'Payment verification', icon: CreditCard, count: '—' },
-  { label: 'Staff accounts', icon: Users },
 ];
 
 const sampleOrders = [
