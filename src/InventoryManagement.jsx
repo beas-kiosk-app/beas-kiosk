@@ -65,6 +65,7 @@ export default function InventoryManagement() {
       notes: form.notes.trim() || null, updated_at: new Date().toISOString()
     };
     if (!payload.name) { setSaving(false); setError('Please enter an item name.'); return; }
+    let saveNotice = 'Inventory item saved.';
     if (editing === 'new') {
       const { data, error: insertError } = await supabase.from('inventory_items').insert(payload).select().single();
       if (insertError) { setSaving(false); setError(insertError.message); return; }
@@ -73,7 +74,7 @@ export default function InventoryManagement() {
           inventory_item_id: data.id, item_name: data.name, movement_type: 'opening',
           quantity_change: payload.quantity, quantity_after: payload.quantity, note: 'Opening stock'
         });
-        if (movementError) setNotice('Item saved, but opening stock history could not be recorded.');
+        if (movementError) saveNotice = 'Item saved, but opening stock history could not be recorded.';
       }
     } else {
       const previous = items.find(item => item.id === editing);
@@ -85,11 +86,11 @@ export default function InventoryManagement() {
           quantity_change: payload.quantity - numberValue(previous.quantity),
           quantity_after: payload.quantity, note: 'Quantity changed while editing item'
         });
-        if (movementError) setNotice('Item updated, but quantity-change history could not be recorded.');
+        if (movementError) saveNotice = 'Item updated, but quantity-change history could not be recorded.';
       }
     }
     setSaving(false); closeItemForm();
-    if (!notice) setNotice('Inventory item saved.');
+    setNotice(saveNotice);
     await loadInventory();
   };
 
@@ -160,7 +161,7 @@ export default function InventoryManagement() {
       <div className="inventory-form-heading"><div><strong>Update {stockItem.name}</strong><p>Current stock: {moneyLikeQty(stockItem.quantity)} {stockItem.unit}</p></div><button type="button" className="admin-icon-button" onClick={() => setStockItem(null)} aria-label="Close"><X size={17}/></button></div>
       <div className="inventory-fields">
         <label>Stock action<select value={movementType} onChange={e => setMovementType(e.target.value)}><option value="restock">Add stock (purchase)</option><option value="usage">Record quantity used</option><option value="adjustment">Set exact stock count</option></select></label>
-        <label>{movementType === 'adjustment' ? 'New total quantity' : 'Quantity'}<input required type="number" min="0.01" step="0.01" value={movementAmount} onChange={e => setMovementAmount(e.target.value)} placeholder="Enter amount"/></label>
+        <label>{movementType === 'adjustment' ? 'New total quantity' : 'Quantity'}<input required type="number" min={movementType === "adjustment" ? 0 : 0.01} step="0.01" value={movementAmount} onChange={e => setMovementAmount(e.target.value)} placeholder="Enter amount"/></label>
         <label className="wide">Note (optional)<input value={movementNote} onChange={e => setMovementNote(e.target.value)} placeholder="e.g. Weekly supplier purchase"/></label>
       </div>
       <div className="inventory-form-actions"><button type="button" className="admin-secondary-button" onClick={() => setStockItem(null)}>Cancel</button><button type="submit" className="admin-primary-button" disabled={saving}><Save size={15}/>{saving ? 'Saving…' : 'Save stock update'}</button></div>
