@@ -185,7 +185,7 @@ function DashboardShell({ onSignOut, ownerEmail }) {
           <div className="admin-breadcrumb">BEA'S KIOSK <span>/</span> <strong>{active}</strong></div>
           <div className="admin-top-actions">
             <label className="admin-search"><Search size={16}/><input placeholder="Search dashboard" aria-label="Search dashboard"/></label>
-            <button className="admin-icon-button admin-notification" aria-label="Notifications"><Bell size={19}/><i /></button>
+            <a className="admin-topbar-logo" href="/" aria-label="BEA’S KIOSK customer store"><img src={mainLogo} alt="BEA’S KIOSK main logo" /></a>
             <div className="admin-owner-controls"><span className="admin-owner-email">{ownerEmail}</span><button className="admin-signout-button" onClick={onSignOut}>Sign out</button><div className="admin-avatar" aria-label="Owner account">BK</div></div>
           </div>
         </header>
