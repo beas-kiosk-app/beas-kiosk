@@ -58,6 +58,12 @@ function App() {
   };
   const [menuType, setMenuType] = useState('regular');
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
+  const [pickupAvailable, setPickupAvailable] = useState(true);
+  const [storeOpen, setStoreOpen] = useState(true);
+  const [acceptingOrders, setAcceptingOrders] = useState(true);
+  const [closedMessage, setClosedMessage] = useState('We are currently closed and will be happy to serve you when we reopen.');
+  const [businessName, setBusinessName] = useState("BEA'S KIOSK");
+  const [openingHours, setOpeningHours] = useState([]);
   const [products, setProducts] = useState([]);
   const [menuLoading, setMenuLoading] = useState(true);
   const [menuError, setMenuError] = useState('');
@@ -69,25 +75,28 @@ const [deliveryUnavailableMessage, setDeliveryUnavailableMessage] = useState(
 );
 
 useEffect(() => {
-  async function loadDeliverySettings() {
-    const { data, error } = await supabase
-      .from('store_settings')
-      .select('delivery_available, delivery_unavailable_message')
-      .eq('id', 1)
-      .single();
-
-    if (error) {
-      console.error('Could not load delivery settings:', error);
+  let active = true;
+  async function loadBusinessSettings() {
+    const { data, error } = await supabase.rpc('get_public_business_settings');
+    if (!active) return;
+    if (!error && data) {
+      setStoreOpen(data.store_open !== false);
+      setAcceptingOrders(data.accepting_orders !== false);
+      setPickupAvailable(data.pickup_available !== false);
+      setDeliveryAvailable(data.delivery_available !== false);
+      setClosedMessage(data.closed_message || 'We are currently closed and will be happy to serve you when we reopen.');
+      setDeliveryUnavailableMessage(data.delivery_unavailable_message || 'Delivery is temporarily unavailable. Pickup is available for all orders.');
+      setBusinessName(data.business_name || "BEA'S KIOSK");
+      setOpeningHours(Array.isArray(data.opening_hours) ? data.opening_hours : []);
       return;
     }
-
-    if (data) {
-      setDeliveryAvailable(data.delivery_available);
-      setDeliveryUnavailableMessage(data.delivery_unavailable_message);
-    }
+    const { data: legacyData, error: legacyError } = await supabase.from('store_settings').select('delivery_available, delivery_unavailable_message').eq('id', 1).single();
+    if (!active) return;
+    if (legacyError) { console.error('Could not load business settings:', error || legacyError); return; }
+    if (legacyData) { setDeliveryAvailable(legacyData.delivery_available); setDeliveryUnavailableMessage(legacyData.delivery_unavailable_message); }
   }
-
-  loadDeliverySettings();
+  loadBusinessSettings();
+  return () => { active = false; };
 }, []);
   
 useEffect(() => {
@@ -134,6 +143,8 @@ useEffect(() => {
   const [trackingPaymentStatus, setTrackingPaymentStatus] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [customer, setCustomer] = useState({ name: '', phone: '', fulfilment: 'Pickup', payment: 'Mobile banking / digital wallet' });
+  const ordersEnabled = storeOpen && acceptingOrders && (pickupAvailable || deliveryAvailable);
+  const selectedFulfilment = pickupAvailable ? (deliveryAvailable ? customer.fulfilment : 'Pickup') : 'Delivery';
   const visibleProducts = useMemo(() => products.filter(p => (category === 'All Items' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(search.toLowerCase())), [products, category, search]);
   const cartItems = products.filter(p => cart[p.id] > 0);
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
@@ -174,6 +185,7 @@ useEffect(() => {
   const placeDemoOrder = async (e) => {
     e.preventDefault();
     if (orderSubmitting || cartItems.length === 0) return;
+    if (!ordersEnabled) { setNotice(closedMessage || 'Online ordering is temporarily unavailable. Please check back soon.'); return; }
     const electronicPayment = customer.payment === 'Mobile banking / digital wallet';
     if (electronicPayment && !receiptFile) {
       setNotice('Please attach your payment receipt or screenshot before placing an electronic-payment order.');
@@ -190,7 +202,7 @@ useEffect(() => {
     const { data, error } = await supabase.rpc('submit_customer_order', {
       p_customer_name: customer.name.trim(),
       p_customer_phone: customer.phone.trim(),
-      p_fulfilment: deliveryAvailable ? customer.fulfilment : 'Pickup',
+      p_fulfilment: selectedFulfilment,
       p_payment_method: customer.payment,
       p_items: orderItems
     });
@@ -233,25 +245,10 @@ useEffect(() => {
     </header>
     <main id="top">
       
-      {!deliveryAvailable && (
-        <div
-          className="delivery-notice"
-          role="status"
-          style={{
-            margin: '16px auto',
-            padding: '14px 20px',
-            maxWidth: '1100px',
-            borderRadius: '12px',
-            background: '#f5e6d5',
-            color: '#50372a',
-            textAlign: 'center',
-            border: '1px solid #d7ae75'
-          }}
-        >
-          <strong>Pickup only at this time</strong>
-          <p style={{ margin: '6px 0 0' }}>
-            {deliveryUnavailableMessage}
-          </p>
+      {(!ordersEnabled || !pickupAvailable || !deliveryAvailable) && (
+        <div className="delivery-notice" role="status" style={{ margin: '16px auto', padding: '14px 20px', maxWidth: '1100px', borderRadius: '12px', background: '#f5e6d5', color: '#50372a', textAlign: 'center', border: '1px solid #d7ae75' }}>
+          <strong>{!storeOpen ? 'The kiosk is currently closed' : !acceptingOrders ? 'Online ordering is paused' : !pickupAvailable && deliveryAvailable ? 'Delivery only at this time' : pickupAvailable && !deliveryAvailable ? 'Pickup only at this time' : 'Ordering is temporarily unavailable'}</strong>
+          <p style={{ margin: '6px 0 0' }}>{!storeOpen || !acceptingOrders ? closedMessage : !deliveryAvailable ? deliveryUnavailableMessage : !pickupAvailable ? 'Pickup is temporarily unavailable. Delivery is available.' : 'Please check back soon.'}</p>
         </div>
       )}
       <section className="hero">
@@ -339,12 +336,13 @@ useEffect(() => {
 
             <button
               className="add-button"
+              disabled={!ordersEnabled}
               onClick={() => {
                 changeQty(p.id, 1);
                 setNotice(`${p.name} added to your cart.`);
               }}
             >
-              <Plus size={16} /> Add to cart
+              <Plus size={16} /> {ordersEnabled ? 'Add to cart' : 'Ordering unavailable'}
             </button>
           </div>
         </article>
@@ -365,7 +363,7 @@ useEffect(() => {
     </main>
     <footer><span>© {new Date().getFullYear()} BEA’S KIOSK</span><span>Made with warmth <span className="heart">♥</span></span><span>Fresh coffee, happy moments.</span></footer>
     {notice&&<div className="toast" role="status"><span>{notice}</span><button onClick={()=>setNotice('')} aria-label="Dismiss"><X size={16}/></button></div>}
-    {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR LITTLE ORDER</span><h2>Your cart ({count})</h2></div><button className="icon-button" onClick={()=>setCartOpen(false)} aria-label="Close cart"><X/></button></div>{cartItems.length===0?<div className="empty-cart"><ShoppingBag size={35}/><h3>Your cart is waiting.</h3><p>Add a coffee or treat to get started.</p><button className="primary-button" onClick={()=>setCartOpen(false)}>Explore menu</button></div>:<><div className="cart-list">{cartItems.map(p=><div className="cart-line" key={p.id}><div className="cart-dot"><Coffee size={18}/></div><div className="cart-product"><strong>{p.name}</strong><span>{money(p.price)}{p.unit?` / ${p.unit}`:''}</span><div className="qty-control"><button onClick={()=>changeQty(p.id,-1)} aria-label={`Remove one ${p.name}`}><Minus size={13}/></button><span>{cart[p.id]}</span><button onClick={()=>changeQty(p.id,1)} aria-label={`Add one ${p.name}`}><Plus size={13}/></button></div></div><strong>{money(p.price*cart[p.id])}</strong></div>)}</div><div className="cart-bottom"><div className="subtotal"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><p>Delivery fees, if applicable, will be confirmed before order submission.</p><button className="primary-button full" onClick={()=>{setCartOpen(false);setCheckoutOpen(true);}}>Continue to checkout <ArrowRight size={17}/></button></div></>}</aside></div>}
+    {cartOpen&&<div className="overlay" onClick={()=>setCartOpen(false)}><aside className="drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR LITTLE ORDER</span><h2>Your cart ({count})</h2></div><button className="icon-button" onClick={()=>setCartOpen(false)} aria-label="Close cart"><X/></button></div>{cartItems.length===0?<div className="empty-cart"><ShoppingBag size={35}/><h3>Your cart is waiting.</h3><p>Add a coffee or treat to get started.</p><button className="primary-button" onClick={()=>setCartOpen(false)}>Explore menu</button></div>:<><div className="cart-list">{cartItems.map(p=><div className="cart-line" key={p.id}><div className="cart-dot"><Coffee size={18}/></div><div className="cart-product"><strong>{p.name}</strong><span>{money(p.price)}{p.unit?` / ${p.unit}`:''}</span><div className="qty-control"><button onClick={()=>changeQty(p.id,-1)} aria-label={`Remove one ${p.name}`}><Minus size={13}/></button><span>{cart[p.id]}</span><button onClick={()=>changeQty(p.id,1)} aria-label={`Add one ${p.name}`}><Plus size={13}/></button></div></div><strong>{money(p.price*cart[p.id])}</strong></div>)}</div><div className="cart-bottom"><div className="subtotal"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><p>Delivery fees, if applicable, will be confirmed before order submission.</p><button className="primary-button full" disabled={!ordersEnabled} onClick={()=>{setCartOpen(false);setCheckoutOpen(true);}}>{ordersEnabled ? 'Continue to checkout' : 'Ordering unavailable'} <ArrowRight size={17}/></button></div></>}</aside></div>}
     
     {checkoutOpen && (
       <div className="overlay" onClick={() => setCheckoutOpen(false)}>
@@ -426,13 +424,14 @@ useEffect(() => {
             <label>
               How would you like your order?
               <select
-                value={deliveryAvailable ? customer.fulfilment : 'Pickup'}
+                disabled={!pickupAvailable && !deliveryAvailable}
+                value={selectedFulfilment}
                 onChange={e =>
                   setCustomer({ ...customer, fulfilment: e.target.value })
                 }
               >
                 <option>Pickup</option>
-                {deliveryAvailable && <option>Delivery</option>}
+                {pickupAvailable && <option>Pickup</option>}{deliveryAvailable && <option>Delivery</option>}
               </select>
             </label>
 
